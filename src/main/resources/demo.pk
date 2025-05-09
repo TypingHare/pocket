@@ -1,0 +1,3 @@
+val square = { x => x * x };
+val sum = { y, z => y + z };
+sum(5, 3) -> square -> print;

@@ -1,0 +1,5 @@
+val cube = { x => x * x * x };
+val incr = { y => y + 1 };
+val res = 2 -> cube -> incr -> cube;
+println(res);
+0

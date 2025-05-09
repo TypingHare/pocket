@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# JetBrains
+.idea
+
+# Gradle
+.gradle
+build
+
+# antlr
+src/main/java/pocket/antlr
