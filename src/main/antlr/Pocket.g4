@@ -9,9 +9,17 @@ additiveOp          : PLUS | MINUS ;
 multiplicativeOp    : ASTERISK | SLASH | PERCENT ;
 unaryOp             : NOT | MINUS ;
 
+decl                : VAL | LET ;
+
+// Destructing
+destructuring       : LEFT_BRACKET (ID (COMMA ID)*)? RIGHT_BRACKET ;
+
 // Statements
-stmt                : expr SEMICOLON                                          # ExprStmt
-                    | ( VAL | LET ) ID ( COLON type )? EQUALS expr SEMICOLON  # DeclStmt
+stmt                : expr SEMICOLON                                           # ExprStmt
+                    | (EXPORT)? decl ID ( COLON type )? EQUALS expr SEMICOLON  # DeclStmt
+                    | (EXPORT)? decl destructuring EQUALS expr SEMICOLON       # DestructingStmt
+                    | ID EQUALS expr SEMICOLON                                 # AssgnStmt
+                    | BREAK IF expr SEMICOLON                                  # BreakStmt
                     ;
 
 // Unary/Binary operations
@@ -47,7 +55,7 @@ type            : ID ;
 // Function declaration expression
 param           : ID (COLON type)? ;
 paramList       : param (COMMA param)*;
-fn              : (TRADE)? LEFT_BRACE (paramList FAT_ARROW)? (stmt)* expr RIGHT_BRACE;
+fn              : (TRADE)? LEFT_BRACE (paramList FAT_ARROW)? (stmt)* (expr)? RIGHT_BRACE;
 
 // If-else expression
 if              : IF LEFT_PAREN expr RIGHT_PAREN expr (ELSE expr)? ;
@@ -96,6 +104,7 @@ LOOP                    : 'loop' ;
 TRADE                   : 'trade' ;
 IMPORT                  : 'import';
 EXPORT                  : 'export' ;
+BREAK                   : 'break' ;
 
 // Literals
 INT_LITERAL             : [0-9]+ ;

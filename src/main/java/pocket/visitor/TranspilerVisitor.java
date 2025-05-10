@@ -1,8 +1,10 @@
 package pocket.visitor;
 
 import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.jetbrains.annotations.NotNull;
 
+import pocket.PocketTranspiler;
 import pocket.antlr.PocketBaseVisitor;
 import pocket.antlr.PocketParser;
 
@@ -22,7 +24,9 @@ public final class TranspilerVisitor extends PocketBaseVisitor<String> {
         final var expr = ctx.expr();
         final var returnStmt = expr != null ? "return " + visit(expr) + ";" : "return 0;";
 
-        return String.format("function %s() {\n%s\n%s\n}", fileFunctionName, stmts, returnStmt);
+        return String.format(
+                "$global['%s'] = { export: {} };\nfunction %s() {\n%s\n%s\n}\n",
+                fileFunctionName, fileFunctionName, stmts, returnStmt);
     }
 
     @Override
@@ -34,10 +38,29 @@ public final class TranspilerVisitor extends PocketBaseVisitor<String> {
     public String visitDeclStmt(PocketParser.DeclStmtContext ctx) {
         final var id = ctx.ID().getText();
         final var expr = visit(ctx.expr());
-        final var isConst = ctx.VAL() != null;
-        final var declKeyword = isConst ? "const" : "let";
+        final var isExport = ctx.EXPORT() != null;
+        final var declKeyword = getJSDeclKeyword(ctx.decl());
 
-        return String.format("%s %s = %s;", declKeyword, id, expr);
+        final var exportStr =
+                isExport
+                        ? String.format(
+                                "\n$global['%s']['export']['%s'] = %s;", fileFunctionName, id, id)
+                        : "";
+        return String.format("%s %s = %s;%s", declKeyword, id, expr, exportStr);
+    }
+
+    @Override
+    public String visitDestructuring(PocketParser.DestructuringContext ctx) {
+        return ctx.ID().stream().map(ParseTree::getText).collect(Collectors.joining(", "));
+    }
+
+    @Override
+    public String visitDestructingStmt(PocketParser.DestructingStmtContext ctx) {
+        final var structBinding = visit(ctx.destructuring());
+        final var exprStr = visit(ctx.expr());
+        final var declKeyword = getJSDeclKeyword(ctx.decl());
+
+        return String.format("%s { %s } = %s;", declKeyword, structBinding, exprStr);
     }
 
     @Override
@@ -122,7 +145,19 @@ public final class TranspilerVisitor extends PocketBaseVisitor<String> {
 
     @Override
     public String visitRelationalExpr(PocketParser.RelationalExprContext ctx) {
-        return visit(ctx.additiveExpr(0));
+        // Start with the first multiplicative expression
+        StringBuilder result = new StringBuilder(visit(ctx.additiveExpr(0)));
+
+        // Loop through the remaining operators and expressions
+        for (int i = 1; i < ctx.additiveExpr().size(); i++) {
+            // Get the operator token between expressions
+            String op = ctx.getChild(2 * i - 1).getText();
+            String right = visit(ctx.additiveExpr(i));
+
+            result.append(" ").append(op).append(" ").append(right);
+        }
+
+        return result.toString();
     }
 
     @Override
@@ -186,10 +221,18 @@ public final class TranspilerVisitor extends PocketBaseVisitor<String> {
     @Override
     public String visitFnExpr(PocketParser.FnExprContext ctx) {
         final var fn = ctx.fn();
-        final var paramList = visit(fn.paramList());
-        final var stmts = fn.stmt().stream().map(this::visit).collect(Collectors.joining(", "));
-        final var expr = "return " + visit(fn.expr()) + ";";
+        final var paramList = fn.paramList() != null ? visit(fn.paramList()) : "";
+        final var stmts = fn.stmt().stream().map(this::visit).collect(Collectors.joining("\n"));
+        final var expr = fn.expr() != null ? "return " + visit(fn.expr()) + ";" : "";
         return "function(" + paramList + ") {\n" + stmts + expr + "\n}";
+    }
+
+    public String visitImportExpr(PocketParser.ImportExprContext ctx) {
+        final var literal = ctx.STRING_LITERAL().getText();
+        final var filename = literal.substring(1, literal.length() - 1);
+        final var fileFunctionName = PocketTranspiler.getFileFunctionName(filename);
+
+        return String.format("$global['%s']['export']", fileFunctionName);
     }
 
     @Override
@@ -205,7 +248,50 @@ public final class TranspilerVisitor extends PocketBaseVisitor<String> {
                         .map(this::visit)
                         .map(args -> "(" + args + ")")
                         .collect(Collectors.joining(", "));
+        final var argString = argList.isBlank() && !ctx.LEFT_PAREN().isEmpty() ? "()" : argList;
 
-        return primaryExpr + argList;
+        return primaryExpr + argString;
+    }
+
+    @Override
+    public String visitLoopExpr(PocketParser.LoopExprContext ctx) {
+        final var exprStr = visit(ctx.expr());
+
+        return "$loop(" + exprStr + ")";
+    }
+
+    @Override
+    public String visitBreakStmt(PocketParser.BreakStmtContext ctx) {
+        final var expr = visit(ctx.expr());
+
+        return String.format("const $breakCond = %s; if ($breakCond) return true;", expr);
+    }
+
+    public String visitParenExpr(PocketParser.ParenExprContext ctx) {
+        return "(" + visit(ctx.expr()) + ")";
+    }
+
+    @Override
+    public String visitAssgnStmt(PocketParser.AssgnStmtContext ctx) {
+        final var id = ctx.ID().getText();
+        final var expr = visit(ctx.expr());
+
+        return String.format("%s = %s;", id, expr);
+    }
+
+    public String visitIfExpr(PocketParser.IfExprContext ctx) {
+        final var ifExpr = ctx.if_();
+        final var cond = visit(ifExpr.expr(0));
+        final var fn1 = visit(ifExpr.expr(1));
+        final var fn2 = ifExpr.expr(2) != null ? visit(ifExpr.expr(2)) : null;
+
+        final var elsePart = fn2 != null ? String.format("else return (%s)();", fn2) : "";
+
+        return String.format(
+                "(function () { if (%s) { return %s(); } %s } )()", cond, fn1, elsePart);
+    }
+
+    private String getJSDeclKeyword(PocketParser.DeclContext ctx) {
+        return ctx.VAL() != null ? "const" : "let";
     }
 }

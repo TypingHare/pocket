@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import pocket.antlr.PocketLexer;
 import pocket.antlr.PocketParser;
+import pocket.visitor.GlobalVisitor;
 import pocket.visitor.TranspilerVisitor;
 
 import java.io.IOException;
@@ -19,8 +20,8 @@ public final class PocketTranspiler {
     /** The working directory of the transpiler. */
     public final Path workingDirectory;
 
-    /** Maps filenames to Pocket parsers. */
-    public final Map<String, PocketParser> parsers = new HashMap<>();
+    /** Maps filenames to AST. */
+    public final Map<String, PocketParser.ProgramContext> parsers = new HashMap<>();
 
     /** Maps filenames to the generated JavaScript functions. */
     public final Map<String, String> fileFunctions = new HashMap<>();
@@ -34,47 +35,66 @@ public final class PocketTranspiler {
     }
 
     /** Parses a Pocket file. */
-    public @NotNull PocketParser parse(@NotNull final String filename) throws IOException {
+    public @NotNull PocketParser.ProgramContext parse(@NotNull final String filename)
+            throws IOException {
+        if (parsers.containsKey(filename)) {
+            return parsers.get(filename);
+        }
+
         final var path = workingDirectory.resolve(filename);
         final var sourceCode = String.join("\n", Files.readAllLines(path));
         final var lexer = new PocketLexer(CharStreams.fromString(sourceCode));
         final var parser = new PocketParser(new CommonTokenStream(lexer));
 
-        parsers.put(filename, parser);
-        return parser;
+        final var cst = parser.program();
+        parsers.put(filename, cst);
+
+        return cst;
     }
 
     public void transpile(@NotNull final String filename) throws IOException {
-        final var parser = parse(filename);
-        final var program = parser.program();
+        if (fileFunctions.containsKey(filename)) {
+            return;
+        }
+
+        final var cst = parse(filename);
 
         final var fileFunctionName = getFileFunctionName(filename);
         final var transpilerVisitor = new TranspilerVisitor(fileFunctionName);
-        final var targetCode = transpilerVisitor.visit(program);
+        var targetCode = transpilerVisitor.visit(cst);
+
+        if (!getFileFunctionName(filename).equals(entryFileFunctionName)) {
+            targetCode = targetCode + String.format("%s();\n", getFileFunctionName(filename));
+        }
 
         fileFunctions.put(filename, targetCode);
     }
 
     public void transpileEntry(@NotNull final String filename) throws IOException {
-        transpile(filename);
         entryFileFunctionName = getFileFunctionName(filename);
+
+        final var globalVisitor = new GlobalVisitor(filename, this);
+        globalVisitor.visit(parse(filename));
+
+        transpile(filename);
     }
 
     public @NotNull String generateJavaScriptFile() {
-        final var libraryString =
+        final var header =
 """
-
+$global = {}; \n
+function $loop(fn) { while(true) { if (fn() === true) break } } \n
 function println(x) { console.log(x); }
-
 """;
         final var callEntryFileFunction =
-                String.format("const exitCode = %s();", entryFileFunctionName);
+                String.format(
+                        "const exitCode = %s();\nprocess.exit(exitCode);", entryFileFunctionName);
 
-        return String.join("\n", fileFunctions.values()) + libraryString + callEntryFileFunction;
+        return header + String.join("\n", fileFunctions.values()) + callEntryFileFunction;
     }
 
     @NotNull
-    private String getFileFunctionName(@NotNull final String filename) {
+    public static String getFileFunctionName(@NotNull final String filename) {
         return "$_" + filename.replace('.', '_').replace("/", "__");
     }
 }

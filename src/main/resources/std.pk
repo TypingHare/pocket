@@ -1,0 +1,6 @@
+export val for_ = { cond, fn =>
+    loop {
+        break if !cond();
+        fn();
+    }
+};

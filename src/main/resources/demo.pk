@@ -1,3 +1,2 @@
-val square = { x => x * x };
-val sum = { y, z => y + z };
-sum(5, 3) -> square -> print;
+val [ square, sum ] = import "fn.pk";
+sum(5, 3) -> square -> println;

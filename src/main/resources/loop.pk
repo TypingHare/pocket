@@ -1,0 +1,9 @@
+val [ for_ ] = import "std.pk";
+
+let sum = 0;
+let i = 1;
+for_({ i <= 10 }, {
+    sum = sum + i;
+    i = i + 1;
+});
+sum -> println;  // Should be: 55
