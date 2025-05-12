@@ -1,0 +1,1 @@
+native val each: (any, (any) => void) => void;

@@ -25,7 +25,7 @@ stmt                : expr SEMICOLON                                           #
                     | (EXPORT)? decl destructuringList EQUALS expr SEMICOLON   # DestructingStmt
                     | ID EQUALS expr SEMICOLON                                 # AssgnStmt
                     | BREAK IF expr SEMICOLON                                  # BreakStmt
-                    | NATIVE VAL ID (COLON type)?                              # NativeStmt
+                    | NATIVE VAL ID (COLON type)? SEMICOLON                    # NativeStmt
                     ;
 
 // Unary/Binary operations
@@ -56,7 +56,11 @@ postfixExpr     : primaryExpr (LEFT_PAREN argList? RIGHT_PAREN)* ;
 argList         : expr (COMMA expr)* ;
 
 // Type (maybe expand in the future)
-type            : ID ;
+// typeParamList   : type (COMMA type)* ;
+type            : ID;
+//type            : ID                                                                # idTypeExpr
+//                | LEFT_PAREN (typeParamList)? RIGHT_PAREN FAT_ARROW (type | VOID)   # lambdaTypeExpr
+//                ;
 
 // Lambda expression
 param           : ID (COLON type)? ;

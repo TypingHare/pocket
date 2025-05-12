@@ -12,7 +12,7 @@ public final class JavaScriptTranspiler implements Transpiler {
   public @NotNull String transpile(
       @NotNull final String entryFilepath, @NotNull final Program program) {
     final var moduleFnNameGenerator = this.getModuleFnNameGenerator();
-    final var directory = Path.of("src/main/resources/pocket");
+    final var directory = Path.of("src/main/resources/pocket/js");
     return new JavaScriptTranspileProgramVisitor(moduleFnNameGenerator, directory)
         .visitProgram(program);
   }
