@@ -42,6 +42,8 @@ TRADE                   : 'trade' ;
 IMPORT                  : 'import';
 EXPORT                  : 'export' ;
 BREAK                   : 'break' ;
+GENERATOR               : 'generator';
+NATIVE                  : 'native';
 
 // Literals
 INT_LITERAL             : '0' | [1-9] [0-9]* ;

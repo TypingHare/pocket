@@ -1,7 +1,8 @@
 plugins {
     id("java")
     id("org.gradle.antlr")
-    application
+    @Suppress("SpellCheckingInspection")
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "pocket"
@@ -17,6 +18,7 @@ dependencies {
     implementation("org.antlr:antlr4-runtime:4.13.2")
     antlr("org.antlr:antlr4:4.13.2")
     implementation("org.jetbrains:annotations:26.0.2")
+    implementation("info.picocli:picocli:4.7.7")
 }
 
 tasks.test {
@@ -32,6 +34,13 @@ tasks.named<AntlrTask>("generateGrammarSource") {
     arguments = listOf("-package", "pocket.antlr", "-visitor")
 }
 
-application {
-    mainClass.set("pocket.Main")
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = "pocket.Main"
+    }
+}
+
+tasks.shadowJar {
+    archiveBaseName.set("pocket")
+    archiveClassifier.set("")
 }

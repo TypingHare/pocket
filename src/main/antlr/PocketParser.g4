@@ -25,6 +25,7 @@ stmt                : expr SEMICOLON                                           #
                     | (EXPORT)? decl destructuringList EQUALS expr SEMICOLON   # DestructingStmt
                     | ID EQUALS expr SEMICOLON                                 # AssgnStmt
                     | BREAK IF expr SEMICOLON                                  # BreakStmt
+                    | NATIVE VAL ID (COLON type)?                              # NativeStmt
                     ;
 
 // Unary/Binary operations
@@ -43,7 +44,7 @@ primaryExpr         : ID                                                    # id
                     | INT_LITERAL                                           # intLiteralExpr
                     | FLOAT_LITERAL                                         # floatLiteralExpr
                     | STRING_LITERAL                                        # stringLiteralExpr
-                    | lambda                                                # fnExpr
+                    | lambda                                                # lambdaExpr
                     | IF LEFT_PAREN expr RIGHT_PAREN expr (ELSE expr)?      # ifExpr
                     | LOOP expr                                             # loopExpr
                     | IMPORT STRING_LITERAL                                 # importExpr
@@ -60,4 +61,4 @@ type            : ID ;
 // Lambda expression
 param           : ID (COLON type)? ;
 paramList       : param (COMMA param)*;
-lambda          : (TRADE)? LEFT_BRACE (paramList FAT_ARROW)? (stmt)* (expr)? RIGHT_BRACE;
+lambda          : (TRADE)? (GENERATOR)? LEFT_BRACE (paramList FAT_ARROW)? (stmt)* (expr)? RIGHT_BRACE;
