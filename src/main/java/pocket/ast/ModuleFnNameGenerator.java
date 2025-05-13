@@ -4,6 +4,6 @@ import org.jetbrains.annotations.NotNull;
 
 @FunctionalInterface
 public interface ModuleFnNameGenerator {
-  @NotNull
-  String generate(@NotNull final String filepath);
+    @NotNull
+    String generate(@NotNull final String filepath);
 }

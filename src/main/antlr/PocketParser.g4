@@ -47,12 +47,13 @@ primaryExpr         : ID                                                    # id
                     | lambda                                                # lambdaExpr
                     | IF LEFT_PAREN expr RIGHT_PAREN expr (ELSE expr)?      # ifExpr
                     | LOOP expr                                             # loopExpr
+                    | YIELD expr expr expr expr                             # yieldExpr
                     | IMPORT STRING_LITERAL                                 # importExpr
                     | LEFT_PAREN expr RIGHT_PAREN                           # parenExpr
                     ;
 
 // Call expression
-postfixExpr     : primaryExpr (LEFT_PAREN argList? RIGHT_PAREN)* ;
+postfixExpr     : (AMPERSAND)? primaryExpr (LEFT_PAREN argList? RIGHT_PAREN)* (lambda)? ;
 argList         : expr (COMMA expr)* ;
 
 // Type (maybe expand in the future)
@@ -65,4 +66,5 @@ type            : ID;
 // Lambda expression
 param           : ID (COLON type)? ;
 paramList       : param (COMMA param)*;
-lambda          : (TRADE)? (GENERATOR)? LEFT_BRACE (paramList FAT_ARROW)? (stmt)* (expr)? RIGHT_BRACE;
+lambda          : (TRADE)? (GENERATOR)? LEFT_BRACE (paramList FAT_ARROW)?
+                  (stmt)* (expr)? RIGHT_BRACE;

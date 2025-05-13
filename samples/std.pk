@@ -1,6 +1,7 @@
-export val for_ = { cond, fn =>
-    loop {
-        break if !cond();
-        fn();
-    }
+export val identity = { x => x };
+
+export val range = generator { start, end =>
+    yield { start } identity { v => v + 1 } { v => v < end }
 };
+
+native val each;

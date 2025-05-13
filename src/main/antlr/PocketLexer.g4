@@ -43,8 +43,8 @@ IMPORT                  : 'import';
 EXPORT                  : 'export' ;
 BREAK                   : 'break' ;
 GENERATOR               : 'generator';
-NATIVE                  : 'native';
-VOID                    : 'void' ;
+YIELD                   : 'yield';
+NATIVE                  : 'native' ;
 
 // Literals
 INT_LITERAL             : '0' | [1-9] [0-9]* ;
