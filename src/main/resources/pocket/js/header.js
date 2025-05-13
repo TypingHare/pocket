@@ -16,10 +16,16 @@ function* $buildGenerator(initializer, toYield, next, isAlive) {
     }
 }
 
-function println(x) {
-    console.log(x);
+function println(...elements) {
+    console.log(elements.map(e => String(e)).join(" "));
 }
 
-function each(fn, iterator) {
-    for (const e of iterator) fn(e)
+function each(fn, iterable) {
+    if (typeof iterable[Symbol.iterator] === 'function') {
+        for (const e of iterable) fn(e)
+    } else if (typeof iterable === 'object') {
+        for (const [key, value] of Object.entries(iterable)) {
+            fn(key, value)
+        }
+    }
 }

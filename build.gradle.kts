@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    kotlin("jvm")
     id("org.gradle.antlr")
     @Suppress("SpellCheckingInspection")
     id("com.github.johnrengelman.shadow") version "8.1.1"
@@ -19,6 +20,7 @@ dependencies {
     antlr("org.antlr:antlr4:4.13.2")
     implementation("org.jetbrains:annotations:26.0.2")
     implementation("info.picocli:picocli:4.7.7")
+    implementation(kotlin("stdlib-jdk8"))
 }
 
 tasks.test {
@@ -40,7 +42,15 @@ tasks.jar {
     }
 }
 
+tasks.named("compileKotlin") {
+    dependsOn(tasks.named("generateGrammarSource"))
+}
+
 tasks.shadowJar {
     archiveBaseName.set("pocket")
     archiveClassifier.set("")
+}
+
+kotlin {
+    jvmToolchain(23)
 }

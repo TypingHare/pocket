@@ -16,42 +16,26 @@ function* $buildGenerator(initializer, toYield, next, isAlive) {
     }
 }
 
-function println(x) {
-    console.log(x);
+function println(...elements) {
+    console.log(elements.map(e => String(e)).join(" "));
 }
 
-function each(fn, iterator) {
-    for (const e of iterator) fn(e)
+function each(fn, iterable) {
+    if (typeof iterable[Symbol.iterator] === 'function') {
+        for (const e of iterable) fn(e)
+    } else if (typeof iterable === 'object') {
+        for (const [key, value] of Object.entries(iterable)) {
+            fn(key, value)
+        }
+    }
 }
 const $global = {};
-$global['$_samples_std'] = { export: {} };
-function $_samples_std() {
-const identity = function (x) {
-return x;
-};
-$global['$_samples_std']['export']['identity'] = identity
-const range = function *(start, end) {yield* $buildGenerator(function () {
-return start;
-}, identity, function (v) {
-return (v + 1);
-}, function (v) {
-return (v < end);
-})
-};
-$global['$_samples_std']['export']['range'] = range
-
+$global['$_samples_list'] = { export: {} };
+function $_samples_list() {
+const list = [1,2,3];
+(function(x) { return each(println, x) })(list);
 return 0;
 }
 
-$_samples_std();
-$global['$_samples_iteration'] = { export: {} };
-function $_samples_iteration() {
-const { range } = $global['$_samples_std']['export'];
-(function(x) { return each(function (num) {
-return println(num);
-}, x) })(range(1, 10));
-return 0;
-}
-;
-const $exitCode = $_samples_iteration();
+const $exitCode = $_samples_list();
 process.exit($exitCode);

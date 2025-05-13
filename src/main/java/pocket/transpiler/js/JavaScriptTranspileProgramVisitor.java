@@ -32,7 +32,9 @@ public final class JavaScriptTranspileProgramVisitor
         this.directory = directory;
     }
 
-    private List<String> moduleFnListToString(@NotNull final List<ModuleFn> moduleFnList) {
+    private List<String> moduleFnListToString(
+        @NotNull final List<ModuleFn> moduleFnList
+    ) {
         final var numFn = moduleFnList.size();
         final var stringList = new ArrayList<String>();
 
@@ -44,8 +46,9 @@ public final class JavaScriptTranspileProgramVisitor
             if (index.getAndIncrement() == numFn - 1) {
                 stringList.add(
                     String.format(
-                        "%s;\nconst $exitCode = %s();\nprocess.exit($exitCode);",
-                        fnString, fnName));
+                        "%s\nconst $exitCode = %s();\nprocess.exit($exitCode);",
+                        fnString, fnName
+                    ));
             } else {
                 stringList.add(String.format("%s\n%s();", fnString, fnName));
             }
@@ -73,7 +76,8 @@ public final class JavaScriptTranspileProgramVisitor
 
         return String.format(
             "%s\nconst $global = {};\n%s", header,
-            String.join("\n", moduleFnStringList));
+            String.join("\n", moduleFnStringList)
+        );
     }
 
     @Override
@@ -87,7 +91,8 @@ public final class JavaScriptTranspileProgramVisitor
 
         return String.format(
             "$global['%s'] = { export: {} };\nfunction %s() {\n%s%s\n}\n",
-            moduleFn.name, moduleFn.name, stmtListString, exprString);
+            moduleFn.name, moduleFn.name, stmtListString, exprString
+        );
     }
 
     @Override
@@ -119,11 +124,15 @@ public final class JavaScriptTranspileProgramVisitor
         final var moduleFnName = moduleFnNameGenerator.generate(
             declStmt.filename);
         final var exportStr =
-            isExport ? String.format("\n$global['%s']['export']['%s'] = %s",
-                moduleFnName, id, id) : "";
+            isExport ? String.format(
+                "\n$global['%s']['export']['%s'] = %s",
+                moduleFnName, id, id
+            ) : "";
 
-        return String.format("%s %s = %s;%s", jsDeclKeyword, id, value,
-            exportStr);
+        return String.format(
+            "%s %s = %s;%s", jsDeclKeyword, id, value,
+            exportStr
+        );
     }
 
     @Override
@@ -198,12 +207,15 @@ public final class JavaScriptTranspileProgramVisitor
         final var condition = visitExpr(expr.condition);
         final var thenFn = visitExpr(expr.thenFn);
         final var elsePart =
-            expr.elseFn == null ? "" : String.format("else return (%s)();",
-                visitExpr(expr.elseFn));
+            expr.elseFn == null ? "" : String.format(
+                "else return (%s)();",
+                visitExpr(expr.elseFn)
+            );
 
         return String.format(
             "(function () { if (%s) { return %s(); } %s } )()", condition,
-            thenFn, elsePart);
+            thenFn, elsePart
+        );
     }
 
     @Override
@@ -239,14 +251,36 @@ public final class JavaScriptTranspileProgramVisitor
         }
 
         final var asterisk = expr.expr instanceof YieldExpr ? "*" : "";
-        return String.format("function %s(%s) {%s%s\n}", asterisk, paramList,
-            stmts, exprStr);
+        return String.format(
+            "function %s(%s) {%s%s\n}", asterisk, paramList,
+            stmts, exprStr
+        );
+    }
+
+    @Override
+    public String visitListExpr(final ListExpr expr) {
+        final var elements = expr.elements.stream().map(this::visitExpr)
+            .collect(Collectors.joining(","));
+
+        return String.format("[%s]", elements);
     }
 
     @Override
     public String visitLoopExpr(final LoopExpr expr) {
         final var loopExpr = visitExpr(expr.expr);
         return String.format("$loop(%s)", loopExpr);
+    }
+
+    @Override
+    public String visitObjectExpr(final ObjectExpr expr) {
+        final var items = expr.items.entrySet().stream()
+            .map(item -> String.format(
+                "%s: %s", item.getKey(),
+                visitExpr(item.getValue())
+            ))
+            .collect(Collectors.joining(","));
+
+        return String.format("{ %s }", items);
     }
 
     @Override
@@ -257,8 +291,10 @@ public final class JavaScriptTranspileProgramVisitor
 
         if (expr.isPartial) {
             // Now it only supports the case where only one parameter is required
-            return String.format("(function(x) { return %s(%s, x) })", callee,
-                args);
+            return String.format(
+                "(function(x) { return %s(%s, x) })", callee,
+                args
+            );
         } else {
             return String.format("%s(%s)", callee, args);
         }
@@ -293,7 +329,9 @@ public final class JavaScriptTranspileProgramVisitor
         final var next = visitExpr(expr.next);
         final var isAlive = visitExpr(expr.isAlive);
 
-        return String.format("yield* $buildGenerator(%s, %s, %s, %s)",
-            initializer, toYield, next, isAlive);
+        return String.format(
+            "yield* $buildGenerator(%s, %s, %s, %s)",
+            initializer, toYield, next, isAlive
+        );
     }
 }

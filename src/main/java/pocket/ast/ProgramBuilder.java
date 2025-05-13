@@ -27,7 +27,8 @@ public final class ProgramBuilder {
     public ProgramBuilder(
         @NotNull final Path workingDirectory,
         @NotNull final String entryFilepath,
-        @NotNull final ModuleFnNameGenerator moduleFnNameGenerator) {
+        @NotNull final ModuleFnNameGenerator moduleFnNameGenerator
+    ) {
         this.workingDirectory = workingDirectory;
         this.entryFilepath = entryFilepath;
         this.moduleFnNameGenerator = moduleFnNameGenerator;
@@ -39,7 +40,8 @@ public final class ProgramBuilder {
         }
 
         final var absolutePath = workingDirectory.resolve(filepath);
-        final var sourceCode = String.join("\n", Files.readAllLines(absolutePath));
+        final var sourceCode = String.join("\n",
+            Files.readAllLines(absolutePath));
         final var lexer = new PocketLexer(CharStreams.fromString(sourceCode));
         final var parser = new PocketParser(new CommonTokenStream(lexer));
         final var cst = parser.moduleFn();
@@ -64,7 +66,8 @@ public final class ProgramBuilder {
         return program;
     }
 
-    private static final class ImportProgramVisitor extends BaseProgramVisitor<Object> {
+    private static final class ImportProgramVisitor
+        extends BaseProgramVisitor<Object> {
         @NotNull
         private final ProgramBuilder programBuilder;
 

@@ -97,8 +97,20 @@ public class BaseProgramVisitor<T> extends ProgramVisitor<T> {
     }
 
     @Override
+    public T visitListExpr(final ListExpr expr) {
+        expr.elements.forEach(this::visitExpr);
+        return null;
+    }
+
+    @Override
     public T visitLoopExpr(final LoopExpr expr) {
         visitExpr(expr.expr);
+        return null;
+    }
+
+    @Override
+    public T visitObjectExpr(final ObjectExpr expr) {
+        expr.items.values().forEach(this::visitExpr);
         return null;
     }
 

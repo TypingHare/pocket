@@ -15,6 +15,7 @@ import pocket.ast.symbol.UnaryOp;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
@@ -41,14 +42,18 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
                 .map(this::<Stmt>visitFor).toList();
         final Expr expr = ctx.expr() == null ? null : visitFor(ctx.expr());
 
-        return new ModuleFn(tokenToBaseNode(ctx.getStart()), functionName,
-            stmts, expr);
+        return new ModuleFn(
+            tokenToBaseNode(ctx.getStart()), functionName,
+            stmts, expr
+        );
     }
 
     @Override
     public ASTNode visitExprStmt(PocketParser.ExprStmtContext ctx) {
-        return new ExprStmt(tokenToBaseNode(ctx.getStart()),
-            visitFor(ctx.expr()));
+        return new ExprStmt(
+            tokenToBaseNode(ctx.getStart()),
+            visitFor(ctx.expr())
+        );
     }
 
     @Override
@@ -56,8 +61,9 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
         final var isExport = ctx.EXPORT() != null;
         final var declKeyword = declToDeclKeyword(ctx.decl());
         final var idExpr = idToIdExpr(ctx.ID());
-        final var typeExpr = ctx.type() == null ? null : this.<TypeExpr>visitFor(
-            ctx.type());
+        final var typeExpr =
+            ctx.type() == null ? null : this.<TypeExpr>visitFor(
+                ctx.type());
 
         return new DeclStmt(
             tokenToBaseNode(ctx.getStart()),
@@ -65,11 +71,14 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
             declKeyword,
             idExpr,
             typeExpr,
-            visitFor(ctx.expr()));
+            visitFor(ctx.expr())
+        );
     }
 
     @Override
-    public ASTNode visitDestructingStmt(PocketParser.DestructingStmtContext ctx) {
+    public ASTNode visitDestructingStmt(
+        PocketParser.DestructingStmtContext ctx
+    ) {
         final var isExport = ctx.EXPORT() != null;
         final var declKeyword = declToDeclKeyword(ctx.decl());
         final var destructuringList = ctx.destructuringList();
@@ -78,20 +87,24 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
 
         return new DestructingStmt(
             tokenToBaseNode(ctx.getStart()), isExport, declKeyword, idList,
-            visitFor(ctx.expr()));
+            visitFor(ctx.expr())
+        );
     }
 
     @Override
     public ASTNode visitAssgnStmt(PocketParser.AssgnStmtContext ctx) {
         return new AssgnStmt(
             tokenToBaseNode(ctx.getStart()), idToIdExpr(ctx.ID()),
-            visitFor(ctx.expr()));
+            visitFor(ctx.expr())
+        );
     }
 
     @Override
     public ASTNode visitBreakStmt(PocketParser.BreakStmtContext ctx) {
-        return new BreakStmt(tokenToBaseNode(ctx.getStart()),
-            visitFor(ctx.expr()));
+        return new BreakStmt(
+            tokenToBaseNode(ctx.getStart()),
+            visitFor(ctx.expr())
+        );
     }
 
     @Override
@@ -105,8 +118,10 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
         Expr left = visitFor(parts.getFirst());
         for (int i = 1; i < parts.size(); i++) {
             final Expr right = visitFor(parts.get(i));
-            left = new BinaryExpr(tokenToBaseNode(ctx.getStart()), left,
-                BinaryOp.PIPE, right);
+            left = new BinaryExpr(
+                tokenToBaseNode(ctx.getStart()), left,
+                BinaryOp.PIPE, right
+            );
         }
 
         return left;
@@ -118,8 +133,10 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
         Expr left = visitFor(parts.getFirst());
         for (int i = 1; i < parts.size(); i++) {
             final Expr right = visitFor(parts.get(i));
-            left = new BinaryExpr(tokenToBaseNode(ctx.getStart()), left,
-                BinaryOp.LOGIC_OR, right);
+            left = new BinaryExpr(
+                tokenToBaseNode(ctx.getStart()), left,
+                BinaryOp.LOGIC_OR, right
+            );
         }
 
         return left;
@@ -131,8 +148,10 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
         Expr left = visitFor(parts.getFirst());
         for (int i = 1; i < parts.size(); i++) {
             final Expr right = visitFor(parts.get(i));
-            left = new BinaryExpr(tokenToBaseNode(ctx.getStart()), left,
-                BinaryOp.LOGIC_AND, right);
+            left = new BinaryExpr(
+                tokenToBaseNode(ctx.getStart()), left,
+                BinaryOp.LOGIC_AND, right
+            );
         }
 
         return left;
@@ -145,8 +164,10 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
         for (int i = 1; i < parts.size(); i++) {
             final Expr right = visitFor(parts.get(i));
             final var op = equalityOpToBinaryOp(ctx.equalityOp(i - 1));
-            left = new BinaryExpr(tokenToBaseNode(ctx.getStart()), left, op,
-                right);
+            left = new BinaryExpr(
+                tokenToBaseNode(ctx.getStart()), left, op,
+                right
+            );
         }
 
         return left;
@@ -159,8 +180,10 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
         for (int i = 1; i < parts.size(); i++) {
             final Expr right = visitFor(parts.get(i));
             final var op = relationalOpToBinaryOp(ctx.relationalOp(i - 1));
-            left = new BinaryExpr(tokenToBaseNode(ctx.getStart()), left, op,
-                right);
+            left = new BinaryExpr(
+                tokenToBaseNode(ctx.getStart()), left, op,
+                right
+            );
         }
 
         return left;
@@ -173,23 +196,29 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
         for (int i = 1; i < parts.size(); i++) {
             final Expr right = visitFor(parts.get(i));
             final var op = additiveOpToBinaryOp(ctx.additiveOp(i - 1));
-            left = new BinaryExpr(tokenToBaseNode(ctx.getStart()), left, op,
-                right);
+            left = new BinaryExpr(
+                tokenToBaseNode(ctx.getStart()), left, op,
+                right
+            );
         }
 
         return left;
     }
 
     @Override
-    public ASTNode visitMultiplicativeExpr(PocketParser.MultiplicativeExprContext ctx) {
+    public ASTNode visitMultiplicativeExpr(
+        PocketParser.MultiplicativeExprContext ctx
+    ) {
         final var parts = ctx.unaryExpr();
         Expr left = visitFor(parts.getFirst());
         for (int i = 1; i < parts.size(); i++) {
             final Expr right = visitFor(parts.get(i));
             final var op = multiplicativeOpToBinaryOp(
                 ctx.multiplicativeOp(i - 1));
-            left = new BinaryExpr(tokenToBaseNode(ctx.getStart()), left, op,
-                right);
+            left = new BinaryExpr(
+                tokenToBaseNode(ctx.getStart()), left, op,
+                right
+            );
         }
 
         return left;
@@ -199,8 +228,10 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
     public ASTNode visitUnaryExpr(PocketParser.UnaryExprContext ctx) {
         if (ctx.unaryExpr() != null) {
             final var op = unaryOpToUnaryOp(ctx.unaryOp());
-            return new UnaryExpr(tokenToBaseNode(ctx.getStart()), op,
-                visitFor(ctx.unaryExpr()));
+            return new UnaryExpr(
+                tokenToBaseNode(ctx.getStart()), op,
+                visitFor(ctx.unaryExpr())
+            );
         }
 
         if (ctx.postfixExpr() != null) {
@@ -218,20 +249,30 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
 
     @Override
     public ASTNode visitIntLiteralExpr(PocketParser.IntLiteralExprContext ctx) {
-        return new IntLiteralExpr(tokenToBaseNode(ctx.getStart()),
-            ctx.getText());
+        return new IntLiteralExpr(
+            tokenToBaseNode(ctx.getStart()),
+            ctx.getText()
+        );
     }
 
     @Override
-    public ASTNode visitFloatLiteralExpr(PocketParser.FloatLiteralExprContext ctx) {
-        return new FloatLiteralExpr(tokenToBaseNode(ctx.getStart()),
-            ctx.getText());
+    public ASTNode visitFloatLiteralExpr(
+        PocketParser.FloatLiteralExprContext ctx
+    ) {
+        return new FloatLiteralExpr(
+            tokenToBaseNode(ctx.getStart()),
+            ctx.getText()
+        );
     }
 
     @Override
-    public ASTNode visitStringLiteralExpr(PocketParser.StringLiteralExprContext ctx) {
-        return new StringLiteralExpr(tokenToBaseNode(ctx.getStart()),
-            ctx.getText());
+    public ASTNode visitStringLiteralExpr(
+        PocketParser.StringLiteralExprContext ctx
+    ) {
+        return new StringLiteralExpr(
+            tokenToBaseNode(ctx.getStart()),
+            ctx.getText()
+        );
     }
 
     @Override
@@ -245,14 +286,18 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
         final Expr thenBranch = visitFor(ctx.expr(1));
         final Expr elseBranch = ctx.expr(2) == null ? null : visitFor(
             ctx.expr(2));
-        return new IfExpr(tokenToBaseNode(ctx.getStart()), condition,
-            thenBranch, elseBranch);
+        return new IfExpr(
+            tokenToBaseNode(ctx.getStart()), condition,
+            thenBranch, elseBranch
+        );
     }
 
     @Override
     public ASTNode visitLoopExpr(PocketParser.LoopExprContext ctx) {
-        return new LoopExpr(tokenToBaseNode(ctx.getStart()),
-            visitFor(ctx.expr()));
+        return new LoopExpr(
+            tokenToBaseNode(ctx.getStart()),
+            visitFor(ctx.expr())
+        );
     }
 
     @Override
@@ -281,14 +326,18 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
         final List<Expr> args =
             ctx.argList().isEmpty() ? new ArrayList<>() : visitArglist(
                 ctx.argList(0));
-        var left = new CallExpr(tokenToBaseNode(ctx.getStart()),
-            isPartial && ctx.argList().size() <= 1, callee, args);
+        var left = new CallExpr(
+            tokenToBaseNode(ctx.getStart()),
+            isPartial && ctx.argList().size() <= 1, callee, args
+        );
         for (int i = 1; i < ctx.argList().size(); i++) {
             final List<Expr> nextArgs = visitArglist(ctx.argList(i));
             final var nextIsPartial = isPartial && i == ctx.argList()
                 .size() - 1;
-            left = new CallExpr(tokenToBaseNode(ctx.getStart()), nextIsPartial,
-                left, nextArgs);
+            left = new CallExpr(
+                tokenToBaseNode(ctx.getStart()), nextIsPartial,
+                left, nextArgs
+            );
         }
 
         // Trailing lambda
@@ -314,14 +363,18 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
                 .map(s -> (Stmt) visit(s)).toList();
         final var expr = ctx.expr() == null ? null : (Expr) visit(ctx.expr());
 
-        return new LambdaExpr(tokenToBaseNode(ctx.getStart()), isTrade, params,
-            stmts, expr);
+        return new LambdaExpr(
+            tokenToBaseNode(ctx.getStart()), isTrade, params,
+            stmts, expr
+        );
     }
 
     @Override
     public ASTNode visitNativeStmt(PocketParser.NativeStmtContext ctx) {
-        return new NativeStmt(tokenToBaseNode(ctx.getStart()),
-            idToIdExpr(ctx.ID()));
+        return new NativeStmt(
+            tokenToBaseNode(ctx.getStart()),
+            idToIdExpr(ctx.ID())
+        );
     }
 
     @Override
@@ -340,6 +393,32 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
         );
     }
 
+    @Override
+    public ASTNode visitListExpr(final PocketParser.ListExprContext ctx) {
+        final var exprList = ctx.listElementList().expr();
+
+        return new ListExpr(
+            tokenToBaseNode(ctx.getStart()),
+            exprList.stream().map(this::<Expr>visitFor).toList()
+        );
+    }
+
+    @Override
+    public ASTNode visitObjectExpr(final PocketParser.ObjectExprContext ctx) {
+        final var idList = ctx.objectElementList().ID();
+        final var itemsList = ctx.objectElementList().expr();
+        final var map = new HashMap<String, Expr>();
+
+        for (int i = 0; i < idList.size(); i++) {
+            map.put(
+                idList.get(i).getText(),
+                this.<Expr>visitFor(itemsList.get(i))
+            );
+        }
+
+        return new ObjectExpr(tokenToBaseNode(ctx.getStart()), map);
+    }
+
     @NotNull
     private ASTNode tokenToBaseNode(@NotNull final Token token) {
         final var line = token.getLine();
@@ -354,14 +433,25 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
         return (D) visit(tree);
     }
 
-    @NotNull
-    private IdExpr idToIdExpr(@NotNull final TerminalNode terminalNode) {
-        return new IdExpr(tokenToBaseNode(terminalNode.getSymbol()),
-            terminalNode.getText());
+    @Override
+    public ASTNode visitEmptyListExpr(
+        final PocketParser.EmptyListExprContext ctx
+    ) {
+        return new ListExpr(tokenToBaseNode(ctx.getStart()), List.of());
     }
 
     @NotNull
-    private DeclKeyword declToDeclKeyword(@NotNull final PocketParser.DeclContext ctx) {
+    private IdExpr idToIdExpr(@NotNull final TerminalNode terminalNode) {
+        return new IdExpr(
+            tokenToBaseNode(terminalNode.getSymbol()),
+            terminalNode.getText()
+        );
+    }
+
+    @NotNull
+    private DeclKeyword declToDeclKeyword(
+        @NotNull final PocketParser.DeclContext ctx
+    ) {
         if (ctx.VAL() != null) {
             return DeclKeyword.VAL;
         }
@@ -375,7 +465,9 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
     }
 
     @NotNull
-    private BinaryOp equalityOpToBinaryOp(final PocketParser.EqualityOpContext ctx) {
+    private BinaryOp equalityOpToBinaryOp(
+        final PocketParser.EqualityOpContext ctx
+    ) {
         if (ctx.EQUAL_EQUALS() != null) {
             return BinaryOp.EQUALS;
         }
@@ -389,7 +481,9 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
     }
 
     @NotNull
-    private BinaryOp relationalOpToBinaryOp(final PocketParser.RelationalOpContext ctx) {
+    private BinaryOp relationalOpToBinaryOp(
+        final PocketParser.RelationalOpContext ctx
+    ) {
         if (ctx.LESS_THAN() != null) {
             return BinaryOp.LESS_THAN;
         }
@@ -411,7 +505,9 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
     }
 
     @NotNull
-    private BinaryOp additiveOpToBinaryOp(final PocketParser.AdditiveOpContext ctx) {
+    private BinaryOp additiveOpToBinaryOp(
+        final PocketParser.AdditiveOpContext ctx
+    ) {
         if (ctx.PLUS() != null) {
             return BinaryOp.PLUS;
         }
@@ -425,7 +521,9 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
     }
 
     @NotNull
-    private BinaryOp multiplicativeOpToBinaryOp(final PocketParser.MultiplicativeOpContext ctx) {
+    private BinaryOp multiplicativeOpToBinaryOp(
+        final PocketParser.MultiplicativeOpContext ctx
+    ) {
         if (ctx.ASTERISK() != null) {
             return BinaryOp.MULTIPLY;
         }
@@ -461,7 +559,9 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
     }
 
     @NotNull
-    private List<LambdaExpr.Param> paramListToParamList(final PocketParser.ParamListContext ctx) {
+    private List<LambdaExpr.Param> paramListToParamList(
+        final PocketParser.ParamListContext ctx
+    ) {
         if (ctx == null) {
             return List.of();
         }
@@ -469,10 +569,13 @@ public final class ModuleFnASTBuilder extends PocketParserBaseVisitor<ASTNode> {
         return ctx.param().stream()
             .map(p -> {
                 final var idExpr = idToIdExpr(p.ID());
-                final var typeExpr = p.type() == null ? null : this.<TypeExpr>visitFor(
-                    p.type());
-                return new LambdaExpr.Param(tokenToBaseNode(p.getStart()),
-                    idExpr, typeExpr);
+                final var typeExpr =
+                    p.type() == null ? null : this.<TypeExpr>visitFor(
+                        p.type());
+                return new LambdaExpr.Param(
+                    tokenToBaseNode(p.getStart()),
+                    idExpr, typeExpr
+                );
             })
             .toList();
     }

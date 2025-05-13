@@ -13,10 +13,12 @@ public abstract class ProgramVisitor<T> {
             case AssgnStmt assgnStmt -> visitAssngStmt(assgnStmt);
             case BreakStmt breakStmt -> visitBreakStmt(breakStmt);
             case DeclStmt declStmt -> visitDeclStmt(declStmt);
-            case DestructingStmt destructingStmt -> visitDestructingStmt(destructingStmt);
+            case DestructingStmt destructingStmt ->
+                visitDestructingStmt(destructingStmt);
             case ExprStmt exprStmt -> visitExprStmt(exprStmt);
             case NativeStmt nativeStmt -> visitNativeStmt(nativeStmt);
-            default -> throw new IllegalStateException("Unexpected value: " + stmt);
+            default ->
+                throw new IllegalStateException("Unexpected value: " + stmt);
         };
     }
 
@@ -39,13 +41,16 @@ public abstract class ProgramVisitor<T> {
             case IfExpr ifExpr -> visitIfExpr(ifExpr);
             case ImportExpr importExpr -> visitImportExpr(importExpr);
             case LambdaExpr lambdaExpr -> visitLambdaExpr(lambdaExpr);
+            case ListExpr listExpr -> visitListExpr(listExpr);
             case LiteralExpr literalExpr -> visitLiteralExpr(literalExpr);
             case LoopExpr loopExpr -> visitLoopExpr(loopExpr);
+            case ObjectExpr objectExpr -> visitObjectExpr(objectExpr);
             case CallExpr postfixExpr -> visitCallExpr(postfixExpr);
             case TypeExpr typeExpr -> visitTypeExpr(typeExpr);
             case UnaryExpr unaryExpr -> visitUnaryExpr(unaryExpr);
             case YieldExpr yieldExpr -> visitYieldExpr(yieldExpr);
-            default -> throw new IllegalStateException("Unexpected value: " + expr);
+            default ->
+                throw new IllegalStateException("Unexpected value: " + expr);
         };
     }
 
@@ -63,16 +68,24 @@ public abstract class ProgramVisitor<T> {
 
     public abstract T visitLambdaExpr(final LambdaExpr expr);
 
+    public abstract T visitListExpr(final ListExpr expr);
+
     public T visitLiteralExpr(final LiteralExpr expr) {
         return switch (expr) {
-            case IntLiteralExpr intLiteralExpr -> visitIntLiteralExpr(intLiteralExpr);
-            case FloatLiteralExpr floatLiteralExpr -> visitFloatLiteralExpr(floatLiteralExpr);
-            case StringLiteralExpr stringLiteralExpr -> visitStringLiteralExpr(stringLiteralExpr);
-            default -> throw new IllegalStateException("Unexpected value: " + expr);
+            case IntLiteralExpr intLiteralExpr ->
+                visitIntLiteralExpr(intLiteralExpr);
+            case FloatLiteralExpr floatLiteralExpr ->
+                visitFloatLiteralExpr(floatLiteralExpr);
+            case StringLiteralExpr stringLiteralExpr ->
+                visitStringLiteralExpr(stringLiteralExpr);
+            default ->
+                throw new IllegalStateException("Unexpected value: " + expr);
         };
     }
 
     public abstract T visitLoopExpr(final LoopExpr expr);
+
+    public abstract T visitObjectExpr(final ObjectExpr expr);
 
     public abstract T visitCallExpr(final CallExpr expr);
 
