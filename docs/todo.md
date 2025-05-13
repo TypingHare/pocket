@@ -1,6 +1,6 @@
 # TODO
 
-- [ ] Generate Abstract Syntax Tree From Concrete Syntax Tree (ONGOING)
-- [ ] Target Language Interface (JavaScript)
-- [ ] Global Context
+- [ ] Dependency Tree (Resolve circular dependency)
 - [ ] Trailing anonymous function
+- [ ] Type Environment (Symbol Table)
+- [ ] Type Checker
