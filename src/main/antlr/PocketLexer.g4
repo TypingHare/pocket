@@ -33,18 +33,23 @@ LESS_THAN_EQUALS        : '<=' ;
 GREATER_THAN            : '>' ;
 GREATER_THAN_EQUALS     : '>=' ;
 
+DOT : '.' ;
+
+// Keywords
 VAL                     : 'val' ;
 LET                     : 'let' ;
 IF                      : 'if' ;
 ELSE                    : 'else' ;
 LOOP                    : 'loop' ;
 TRADE                   : 'trade' ;
-IMPORT                  : 'import';
+IMPORT                  : 'import' ;
 EXPORT                  : 'export' ;
 BREAK                   : 'break' ;
-GENERATOR               : 'generator';
-YIELD                   : 'yield';
+YIELD                   : 'yield' ;
 NATIVE                  : 'native' ;
+
+TRUE                    : 'true' ;
+FALSE                   : 'false' ;
 
 // Literals
 INT_LITERAL             : '0' | [1-9] [0-9]* ;
@@ -56,6 +61,10 @@ STRING_LITERAL          : '"' (~["\\] | '\\' .)* '"' ;
 
 // Identifiers
 ID                      : [a-zA-Z_][a-zA-Z0-9_]* ;
+
+// Path
+fragment FILENAME_CHAR  : [a-zA-Z0-9_] | '.' | '-' ;
+FILENAME                : FILENAME_CHAR+ ;
 
 // Whitespace & Comments
 WHITE_SPACE             : [ \t\r\n]+ -> skip ;

@@ -38,7 +38,7 @@ tasks.named<AntlrTask>("generateGrammarSource") {
 
 tasks.jar {
     manifest {
-        attributes["Main-Class"] = "pocket.Main"
+        attributes["Main-Class"] = "pocket.Pocket"
     }
 }
 

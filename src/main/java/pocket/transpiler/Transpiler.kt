@@ -1,20 +1,15 @@
 package pocket.transpiler
 
-import pocket.ast.ModuleFnNameGenerator
-import pocket.ast.Program
+import pocket.ast.node.Program
 
-interface Transpiler {
-    /**
-     * The module function name generator.
-     */
-    val moduleFnNameGenerator: ModuleFnNameGenerator
+/**
+ * Represents a transpiler that transpiles a Pocket program abstract syntax tree
+ * into a target language program.
+ *
+ * @see pocket.ast.node.Program
+ */
+abstract class Transpiler() {
+    abstract fun transpile(program: Program): String
 
-    /**
-     * Transpiles a Pocket abstract syntax tree into a target language.
-     *
-     * @param entryFilepath The path to the Pocket source file.
-     * @param program       A Pocket abstract syntax tree.
-     * @return A target code string.
-     */
-    fun transpile(entryFilepath: String, program: Program): String
+    abstract fun fnNameGenerator(filepath: String): String
 }
