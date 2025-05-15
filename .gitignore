@@ -8,7 +8,7 @@
 .gradle
 build
 
-# antlr
+# ANTLR
 src/main/java/pocket/antlr
 src/main/gen
 
@@ -18,3 +18,6 @@ out.js
 # Node.js
 src/main/nodejs/src/libs
 src/main/nodejs/node_modules
+
+# Kotlin
+.kotlin

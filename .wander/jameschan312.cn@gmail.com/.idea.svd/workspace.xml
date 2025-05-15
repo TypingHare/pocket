@@ -5,18 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="00b514f2-939f-4f28-8235-44af774f8f76" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/docs/todo.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/todo.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/idea.editorconfig" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/samples/dated/std.pk" beforeDir="false" afterPath="$PROJECT_DIR$/samples/std.pk" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/antlr/PocketLexer.g4" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/antlr/PocketLexer.g4" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/antlr/PocketLexer.tokens" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/antlr/PocketParser.g4" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/antlr/PocketParser.g4" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/pocket/Pocket.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pocket/Pocket.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/pocket/Transpilation.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pocket/Transpilation.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/pocket/ast/builder/ModuleFnBuilder.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pocket/ast/builder/ModuleFnBuilder.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/pocket/transpiler/Transpiler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pocket/transpiler/Transpiler.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/pocket/transpiler/js/JavaScriptTranspiler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pocket/transpiler/js/JavaScriptTranspiler.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/pocket/transpiler/js/JavaScriptVisitor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/pocket/transpiler/js/JavaScriptVisitor.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,6 +46,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
     "Gradle.Build pocket.executor": "Run",
     "Kotlin.Pocket.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
@@ -74,7 +64,7 @@
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
     "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "preferences.sourceCode",
+    "settings.editor.selected.configurable": "preferences.sourceCode.Markdown",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -119,7 +109,8 @@
       <option name="presentableId" value="Default" />
       <updated>1747281541044</updated>
       <workItem from="1747281542363" duration="1246000" />
-      <workItem from="1747318660147" duration="7185000" />
+      <workItem from="1747318660147" duration="21211000" />
+      <workItem from="1747351430287" duration="1021000" />
     </task>
     <servers />
   </component>
