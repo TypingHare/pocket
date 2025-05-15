@@ -1,19 +1,21 @@
 {
   "name": "@typinghare/pocket",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Pocket transpiler.",
   "main": "index.js",
   "type": "module",
   "bin": {
     "trick": "bin/pocket"
   },
-  "scripts": {
-    "test": ""
-  },
+  "scripts": {},
   "keywords": [
-    "transpiler"
+    "transpiler",
+    "pocket"
   ],
-  "author": "",
+  "author": {
+    "name": "James Chen",
+    "email": "jameschan312.cn@gmail.com"
+  },
   "license": "MIT",
   "packageManager": "pnpm@10.10.0"
 }
