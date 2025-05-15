@@ -1,0 +1,8 @@
+// Okay
+val object = [
+    name: "James",
+    age: 26
+];
+object -> &each { k, v =>
+    println(k + ": " + v)
+};

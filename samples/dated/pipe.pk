@@ -1,0 +1,4 @@
+// Okay
+val [ cube, incr ] = import <fn.pk>;
+val res = 2 -> cube -> incr -> cube;
+res -> println;
