@@ -1,11 +1,11 @@
 {
   "name": "@typinghare/pocket",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Pocket transpiler.",
   "main": "index.js",
   "type": "module",
   "bin": {
-    "trick": "bin/pocket"
+    "pocket": "bin/pocket"
   },
   "scripts": {},
   "keywords": [
@@ -17,5 +17,5 @@
     "email": "jameschan312.cn@gmail.com"
   },
   "license": "MIT",
-  "packageManager": "pnpm@10.10.0"
+  "packageManager": "pnpm@10.11.0"
 }
