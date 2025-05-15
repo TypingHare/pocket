@@ -8,6 +8,6 @@ import pocket.ast.node.Program
  *
  * @see pocket.ast.node.Program
  */
-abstract class Transpiler() {
-    abstract fun transpile(program: Program): String
+abstract class Transpiler(val program: Program) {
+    abstract fun transpile(): String
 }

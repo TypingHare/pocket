@@ -113,10 +113,12 @@ class JavaScriptVisitor(
         }
 
         val operatorString = when (expr.operator) {
+            BinaryOperator.EQUALS -> "==="
+            BinaryOperator.NOT_EQUALS -> "!=="
             else -> expr.operator.toString()
         }
 
-        return "($leftString $operatorString $rightString)"
+        return "$leftString $operatorString $rightString"
     }
 
     override fun visitUnaryExpr(expr: UnaryExpr): String {

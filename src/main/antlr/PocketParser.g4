@@ -49,11 +49,11 @@ listElementList     : expr (COMMA expr)* COMMA?;
 objectElementList   : ID COLON expr (COMMA ID COLON expr)* COMMA?;
 
 // Primary Expression
-primaryExpr         : ID                                                         # idExpr
-                    | INT_LITERAL                                                # intLiteralExpr
+primaryExpr         : INT_LITERAL                                                # intLiteralExpr
                     | FLOAT_LITERAL                                              # floatLiteralExpr
                     | (TRUE | FALSE)                                             # boolExpr
                     | STRING_LITERAL                                             # stringLiteralExpr
+                    | ID                                                         # idExpr
                     | LEFT_BRACKET RIGHT_BRACKET                                 # emptyListExpr
                     | LEFT_BRACKET objectElementList RIGHT_BRACKET               # objectExpr
                     | LEFT_BRACKET listElementList RIGHT_BRACKET                 # listExpr
@@ -61,16 +61,16 @@ primaryExpr         : ID                                                        
                     | IF LEFT_PAREN expr RIGHT_PAREN expr (ELSE expr)?           # ifExpr
                     | LOOP expr                                                  # loopExpr
                     | YIELD expr expr expr expr                                  # yieldExpr
-                    | IMPORT LESS_THAN (ID | filepath) GREATER_THAN              # importExpr
+                    | IMPORT LESS_THAN targetPath GREATER_THAN                   # importExpr
                     | LEFT_PAREN expr RIGHT_PAREN                                # parenExpr
                     ;
 
-// Call expression
-postfixExpr     : (AMPERSAND)? primaryExpr
-                  (LEFT_PAREN argListOrEmpty RIGHT_PAREN)* (lambda)?
-                ;
-argListOrEmpty  : argList? ;
-argList         : expr (COMMA expr)* ;
+// Postfix expression
+postfixExpr         : (AMPERSAND)? primaryExpr postfixPart* (lambda)? ;
+postfixPart         : DOT ID                                                     # postfixMemberAccess
+                    | LEFT_PAREN argList RIGHT_PAREN                             # postfixCall
+                    ;
+argList             : expr (COMMA expr)* ;
 
 // Type (maybe expand in the future)
 // typeParamList   : type (COMMA type)* ;
@@ -80,11 +80,9 @@ type            : ID;
 //                ;
 
 // Lambda expression
-param           : ID (COLON type)? ;
-paramList       : param (COMMA param)*;
-lambda          : (TRADE)? LEFT_BRACE (paramList FAT_ARROW)?
-                  (stmt)* (expr)? RIGHT_BRACE;
-// Path
-filepath                : (SLASH? FILENAME (SLASH FILENAME)*)
-                        | SLASH
-                        ;
+param               : ID (COLON type)? ;
+paramList           : param (COMMA param)*;
+lambda              : (TRADE)? LEFT_BRACE (paramList FAT_ARROW)?
+                      (stmt)* (expr)? RIGHT_BRACE;
+
+targetPath          : ID ((SLASH | DOT) ID)* ;

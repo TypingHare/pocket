@@ -1,0 +1,2 @@
+val person = [ name: "James", age: 26 ];
+person.name + " is " + person.age + " years old." -> println;

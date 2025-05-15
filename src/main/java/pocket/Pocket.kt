@@ -1,9 +1,10 @@
 package pocket
 
 import picocli.CommandLine
+import pocket.provider.NodeProcessProvider
 import pocket.transpiler.Transpiler
 import pocket.transpiler.js.JavaScriptTranspiler
-import java.io.*
+import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.Callable
@@ -32,59 +33,76 @@ object Pocket : Callable<Int?> {
 
     @CommandLine.Option(
         names = ["-n", "--no-emit"],
+        negatable = true,
         description = ["Do not emit the generated code."],
+        defaultValue = "true"
+    )
+    private var shouldEmit = true
+
+    @CommandLine.Option(
+        names = ["-e", "--execute"],
+        description = ["Execute the generated code."],
         defaultValue = "false"
     )
-    private var shouldNoEmit = false
+    private var shouldExecute = false
+
+    @CommandLine.Option(
+        names = ["-t", "--target"],
+        description = ["The target language of the generated code."],
+        defaultValue = "JavaScript"
+    )
+    private var targetLanguage: String = "JavaScript"
 
     @Throws(Exception::class)
     override fun call(): Int {
         val workingDirectory = Path.of(System.getProperty("user.dir"))
         val entryFilepath = workingDirectory.resolve(Path.of(entryFilepath))
-        val transpilation = Transpilation(getTranspiler())
-        val targetCode = transpilation.transpile(entryFilepath)
+        val targetCode = Transpilation(getTranspiler()).transpile(entryFilepath)
 
-        when (shouldNoEmit) {
-            true -> executeTargetCode(targetCode)
-            false -> Files.writeString(
+        if (shouldEmit) {
+            Files.writeString(
                 workingDirectory.resolve(outputFilepath),
                 targetCode
             )
         }
 
+        if (shouldExecute) {
+            executeTargetCode(targetCode)
+        }
+
         return CommandLine.ExitCode.OK
     }
 
-    private fun getTranspiler(): KClass<out Transpiler> {
-        return JavaScriptTranspiler::class
-    }
+    private fun getTranspiler(): KClass<out Transpiler> =
+        when (targetLanguage) {
+            "JavaScript" -> JavaScriptTranspiler::class
+            else -> error("Unsupported target language: $targetLanguage")
+        }
 
     @Throws(IOException::class, InterruptedException::class)
     private fun executeTargetCode(targetCode: String) {
-        val processBuilder = ProcessBuilder("node")
-        val process = processBuilder.start()
+        val process = getProcessProvider().get()
 
-        BufferedWriter(OutputStreamWriter(process.outputStream)).use { writer ->
-            writer.write(targetCode)
-            writer.flush()
+        process.outputStream.bufferedWriter().use {
+            it.write(targetCode)
         }
 
-        BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
-            var line: String?
-            while ((reader.readLine().also { line = it }) != null) {
-                println(line)
-            }
+        process.inputStream.bufferedReader().useLines { lines ->
+            lines.forEach { println(it) }
         }
 
-        BufferedReader(InputStreamReader(process.errorStream)).use { errReader ->
-            var errLine: String?
-            while ((errReader.readLine().also { errLine = it }) != null) {
-                System.err.println(errLine)
-            }
+        process.errorStream.bufferedReader().useLines { lines ->
+            lines.forEach { println(it) }
         }
 
         exitProcess(process.waitFor())
     }
+
+    private fun getProcessProvider(): NodeProcessProvider =
+        when (targetLanguage) {
+            "JavaScript" -> NodeProcessProvider()
+            else -> error("Unsupported target language: $targetLanguage")
+        }
 
     @JvmStatic
     fun main(args: Array<String>) {

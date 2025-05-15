@@ -62,10 +62,6 @@ STRING_LITERAL          : '"' (~["\\] | '\\' .)* '"' ;
 // Identifiers
 ID                      : [a-zA-Z_][a-zA-Z0-9_]* ;
 
-// Path
-fragment FILENAME_CHAR  : [a-zA-Z0-9_] | '.' | '-' ;
-FILENAME                : FILENAME_CHAR+ ;
-
 // Whitespace & Comments
 WHITE_SPACE             : [ \t\r\n]+ -> skip ;
 LINE_COMMENT            : '//' ~[\r\n]* -> skip ;

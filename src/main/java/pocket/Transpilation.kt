@@ -7,9 +7,9 @@ import kotlin.reflect.KClass
 
 class Transpilation(val transpilerClass: KClass<out Transpiler>) {
     fun transpile(entryFilepath: Path): String {
-        val transpiler = transpilerClass.constructors.first().call()
         val program = ProgramBuilder(entryFilepath).build()
+        val transpiler = transpilerClass.constructors.first().call(program)
 
-        return transpiler.transpile(program)
+        return transpiler.transpile()
     }
 }

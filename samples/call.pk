@@ -1,0 +1,2 @@
+val greet = { name => "Hello " + name + "!" };
+"Pocket" -> greet -> println;

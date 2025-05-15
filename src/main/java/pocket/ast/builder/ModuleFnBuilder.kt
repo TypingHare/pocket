@@ -196,41 +196,47 @@ class ModuleFnBuilder(val filepath: Path) : PocketParserBaseVisitor<ASTNode>() {
         return YieldExpr(startNode(ctx), initializer, isAlive, toYield, updater)
     }
 
+    override fun visitPostfixMemberAccess(ctx: PostfixMemberAccessContext?): ASTNode? {
+        return super.visitPostfixMemberAccess(ctx)
+    }
+
     override fun visitPostfixExpr(ctx: PostfixExprContext): ASTNode {
         val hasTrailingLambda = ctx.lambda() != null
-        if (ctx.LEFT_PAREN().isEmpty() && !hasTrailingLambda) {
+        if (ctx.postfixPart().isEmpty() && !hasTrailingLambda) {
             return visit(ctx.primaryExpr())
         }
 
         val isPartial = ctx.AMPERSAND() != null
-        val callee = visitFor<Expr>(ctx.primaryExpr())
-        val argListList = ctx.argListOrEmpty().map { argListOrEmpty ->
-            argListOrEmpty.argList()?.let(::toArgList).orEmpty()
-        }
-
-        val lastExpr = argListList.fold(callee) { currentCallee, args ->
-            CallExpr(startNode(ctx), isPartial, currentCallee, args)
-        }
-
-        return if (hasTrailingLambda) {
-            val lambdaExpr = visitFor<Expr>(ctx.lambda())
-            return if (lastExpr is CallExpr) {
-                CallExpr(
-                    startNode(ctx),
-                    isPartial,
-                    lastExpr.callee,
-                    lastExpr.argList + lambdaExpr
+        val left = visitFor<Expr>(ctx.primaryExpr())
+        val lastExpr = ctx.postfixPart().fold(left) { left, postfixPart ->
+            val node = startNode(postfixPart)
+            when (postfixPart) {
+                is PostfixMemberAccessContext -> MemberExpr(
+                    node, left, postfixPart.ID().text
                 )
-            } else {
-                CallExpr(
-                    startNode(ctx),
-                    isPartial,
-                    lastExpr,
-                    listOf(lambdaExpr)
+                is PostfixCallContext -> CallExpr(
+                    node, isPartial, left, toArgList(postfixPart.argList())
                 )
+                else -> error("Unexpected postfix part: ${postfixPart.text}")
             }
+        }
+
+        if (!hasTrailingLambda) {
+            return lastExpr
+        }
+
+        // Support trailing lambda
+        val lambdaExpr = visitFor<Expr>(ctx.lambda())
+        val node = startNode(ctx)
+        return if (lastExpr is CallExpr) {
+            CallExpr(
+                node,
+                isPartial,
+                lastExpr.callee,
+                lastExpr.argList + lambdaExpr
+            )
         } else {
-            lastExpr
+            CallExpr(node, isPartial, lastExpr, listOf(lambdaExpr))
         }
     }
 
@@ -267,11 +273,7 @@ class ModuleFnBuilder(val filepath: Path) : PocketParserBaseVisitor<ASTNode>() {
         TypeExpr(startNode(ctx), visitFor(ctx.ID()))
 
     override fun visitImportExpr(ctx: ImportExprContext): ASTNode {
-        val targetPath = when {
-            ctx.ID() != null -> ctx.ID().text
-            ctx.filepath() != null -> ctx.filepath().text
-            else -> ""
-        }
+        val targetPath = ctx.targetPath().text
         return ImportExpr(startNode(ctx), targetPath)
     }
 
@@ -345,6 +347,7 @@ class ModuleFnBuilder(val filepath: Path) : PocketParserBaseVisitor<ASTNode>() {
             is MultiplicativeOpContext -> when {
                 ctx.ASTERISK() != null -> BinaryOperator.MULTIPLY
                 ctx.SLASH() != null -> BinaryOperator.DIVIDE
+                ctx.PERCENT() != null -> BinaryOperator.MODULO
                 else -> error("Unexpected binary operator: ${ctx.text}")
             }
             else -> error("Unexpected binary operator: ${ctx.text}")

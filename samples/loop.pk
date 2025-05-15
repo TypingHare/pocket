@@ -1,0 +1,2 @@
+val [ range ] = import <std.pk>;
+range(1, 6) -> &each { x => println("Count: " + x) };
