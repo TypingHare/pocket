@@ -4,7 +4,7 @@ function $loop(fn) {
     }
 }
 
-function* $buildGenerator(initializer, toYield, next, isAlive) {
+function* $buildGenerator(initializer, isAlive, toYield, next, ) {
     let value = initializer()
     while (true) {
         if (isAlive(value)) {
