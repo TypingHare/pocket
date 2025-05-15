@@ -14,3 +14,7 @@ src/main/gen
 
 # Pocket output
 out.js
+
+# Node.js
+src/main/nodejs/src/libs
+src/main/nodejs/node_modules
