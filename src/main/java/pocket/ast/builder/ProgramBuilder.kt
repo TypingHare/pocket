@@ -24,8 +24,14 @@ class ProgramBuilder(
      */
     private val rootDirectory = entryFileAbsolutePath.parent
 
+    /**
+     * Maps absolute file paths to dependency nodes.
+     */
     private val dependencyMap = mutableMapOf<Path, DependencyNode>()
 
+    /**
+     * The list of module functions.
+     */
     private val moduleFnList = mutableListOf<ModuleFn>()
 
     fun build(): Program {
@@ -52,7 +58,7 @@ class ProgramBuilder(
         val parser = PocketParser(CommonTokenStream(lexer))
         val moduleFnCst = parser.moduleFn()
 
-        val fnName = fnNameGenerator(fileAbsolutePath.fileName.toString())
+        val fnName = fnNameGenerator(fileAbsolutePath.toString())
         val moduleFn = ModuleFnBuilder(fileAbsolutePath, fnName)
             .visitModuleFn(moduleFnCst) as ModuleFn
 

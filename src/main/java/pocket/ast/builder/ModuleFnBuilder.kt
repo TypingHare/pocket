@@ -202,7 +202,7 @@ class ModuleFnBuilder(
 
     override fun visitPostfixExpr(ctx: PostfixExprContext): ASTNode {
         if (ctx.LEFT_PAREN().isEmpty() && ctx.lambda() == null) {
-            return visit(ctx.primaryExpr());
+            return visit(ctx.primaryExpr())
         }
 
         val isPartial = ctx.AMPERSAND() != null

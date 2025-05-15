@@ -1,6 +1,7 @@
 package pocket.transpiler.js
 
 import pocket.ast.BinaryOperator
+import pocket.ast.DeclKeyword
 import pocket.ast.node.*
 import pocket.ast.visitor.Visitor
 import java.io.IOException
@@ -14,17 +15,16 @@ class JavaScriptVisitor(
     private val transpilerDirectory = Path.of("src/main/resources/pocket/js")
 
     override fun visitProgram(program: Program): String {
-        val moduleFnStringListString =
-            moduleFnListToString(program.moduleFnList).joinToString { "\n" }
+        val moduleFnStringList = moduleFnListToString(program.moduleFnList)
+        val moduleFnStringListString = moduleFnStringList.joinToString("\n")
         val header = getHeader()
 
         return "$header\nconst \$global = {}; \n$moduleFnStringListString"
     }
 
     override fun visitModuleFn(moduleFn: ModuleFn): String {
-        val stmtListString = moduleFn.stmtList
-            .map { this::visitStmt }
-            .joinToString("\n")
+        val stmtListString =
+            moduleFn.stmtList.joinToString("\n") { visitStmt(it) }
         val exprString = moduleFn.returnExpr
             ?.let { visitExpr(it) }
             ?: "return 0;"
@@ -45,18 +45,43 @@ class JavaScriptVisitor(
     }
 
     override fun visitDeclStmt(stmt: DeclStmt): String {
-        TODO("Not yet implemented")
+        val declKeyword = getJSDeclKeyword(stmt.declKeyword)
+        val idString = visitIdExpr(stmt.id)
+        val valueString = visitExpr(stmt.value)
+        val fnName = transpiler.getFnName(stmt.filepath.toString())
+
+        return if (stmt.isExport) {
+            "$declKeyword $idString = $valueString;" +
+                    "\n\$global['$fnName']['export']['$idString'] = $idString;"
+        } else {
+            "$declKeyword $idString = $valueString;"
+
+        }
     }
 
     override fun visitAssignmentStmt(stmt: AssignmentStmt): String {
-        val id = visitIdExpr(stmt.id);
-        val valueExpr = visitExpr(stmt.value);
+        val id = visitIdExpr(stmt.id)
+        val valueExpr = visitExpr(stmt.value)
 
         return "$id = $valueExpr;"
     }
 
     override fun visitDestructingStmt(stmt: DestructingStmt): String {
-        TODO("Not yet implemented")
+        val declKeyword = getJSDeclKeyword(stmt.declKeyword)
+        val idListString = stmt.idList.joinToString(", ") { visitIdExpr(it) }
+        val valueString = visitExpr(stmt.value)
+
+        val fnName = transpiler.getFnName(stmt.filepath.toString())
+        return if (stmt.isExport) {
+            StringBuilder().apply {
+                append("$declKeyword [ $idListString ] = $valueString;")
+                for (idString in idListString) {
+                    append("\n\$global['$fnName']['export']['$idString'] = $idString;")
+                }
+            }.toString()
+        } else {
+            "$declKeyword [ $idListString ] = $valueString;"
+        }
     }
 
     override fun visitBreakStmt(stmt: BreakStmt): String {
@@ -102,7 +127,16 @@ class JavaScriptVisitor(
     }
 
     override fun visitLambdaExpr(expr: LambdaExpr): String {
-        TODO("Not yet implemented")
+        val paramListString = expr.paramMap.keys.joinToString(", ")
+        val stmtStringList = expr.stmtList.map { visitStmt(it) }
+        val returnExprString =
+            expr.returnExpr?.let { "return " + visitExpr(it) }
+        val bodyString = when (returnExprString) {
+            null -> stmtStringList
+            else -> stmtStringList + returnExprString
+        }.joinToString("\n")
+
+        return "function ($paramListString) {\n$bodyString\n}"
     }
 
     override fun visitYieldExpr(expr: YieldExpr): String {
@@ -115,7 +149,14 @@ class JavaScriptVisitor(
     }
 
     override fun visitCallExpr(expr: CallExpr): String {
-        TODO("Not yet implemented")
+        val calleeString = visitExpr(expr.callee)
+        val argListString = expr.argList.joinToString(", ") { visitExpr(it) }
+
+        return if (expr.isPartial) {
+            "(function($0) { return $calleeString($argListString, $0); })"
+        } else {
+            "$calleeString($argListString)"
+        }
     }
 
     override fun visitListExpr(expr: ListExpr): String {
@@ -152,9 +193,7 @@ class JavaScriptVisitor(
     override fun visitTypeExpr(expr: TypeExpr): String = ""
 
     override fun visitImportExpr(expr: ImportExpr): String {
-        val filepath = expr.targetPath
-        val importedFnName = transpiler
-
+        val importedFnName = transpiler.getFnName(expr.targetPath)
         return "\$global['$importedFnName']['export']"
     }
 
@@ -182,6 +221,12 @@ class JavaScriptVisitor(
             throw RuntimeException("Header file not found: $headerFilepath", ex)
         }
     }
+
+    private fun getJSDeclKeyword(declKeyword: DeclKeyword): String =
+        when (declKeyword) {
+            DeclKeyword.VAL -> "const"
+            DeclKeyword.LET -> "let"
+        }
 
     companion object {
         const val HEADER_FILEPATH = "header.js"

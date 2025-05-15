@@ -11,3 +11,6 @@ build
 # antlr
 src/main/java/pocket/antlr
 src/main/gen
+
+# Pocket output
+out.js

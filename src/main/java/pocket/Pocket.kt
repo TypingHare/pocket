@@ -1,6 +1,5 @@
 package pocket
 
-import jdk.internal.org.jline.utils.Colors.s
 import picocli.CommandLine
 import pocket.transpiler.Transpiler
 import pocket.transpiler.js.JavaScriptTranspiler
@@ -68,12 +67,14 @@ object Pocket : Callable<Int?> {
             writer.write(targetCode)
             writer.flush()
         }
+
         BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
             var line: String?
             while ((reader.readLine().also { line = it }) != null) {
                 println(line)
             }
         }
+
         BufferedReader(InputStreamReader(process.errorStream)).use { errReader ->
             var errLine: String?
             while ((errReader.readLine().also { errLine = it }) != null) {
@@ -86,8 +87,6 @@ object Pocket : Callable<Int?> {
 
     @JvmStatic
     fun main(args: Array<String>) {
-
-        println(s)
-//        exitProcess(CommandLine(Pocket).execute(*args))
+        exitProcess(CommandLine(Pocket).execute(*args))
     }
 }

@@ -80,7 +80,7 @@ open class StructuralVisitor<T> : BaseVisitor<T>() {
         visitExpr(expr.callee)
         expr.argList.forEach { visitExpr(it) }
 
-        return null;
+        return null
     }
 
     override fun visitListExpr(expr: ListExpr): T? {
