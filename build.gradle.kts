@@ -61,3 +61,21 @@ tasks.register<Copy>("moveBin") {
     from(file("build/libs/pocket-$version.jar"))
     into(file("src/main/nodejs/src/libs"))
 }
+
+tasks.register("release") {
+    dependsOn("moveBin")
+
+    doLast {
+        val scriptContent = """
+            |#!/usr/bin/env bash
+            |
+            |SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+            |java -jar "${'$'}SCRIPT_DIR/../src/libs/pocket-$version.jar" "$@"
+        """.trimMargin()
+
+        file("src/main/nodejs/bin/pocket").apply {
+            writeText(scriptContent)
+            setExecutable(true)
+        }
+    }
+}
