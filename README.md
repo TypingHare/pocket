@@ -1,6 +1,6 @@
 # [Pocket](https://github.com/TypingHare/pocket)
 
-## Philosophy
+## Basics
 
 Pocket is a weakly and statically typed scripting language designed to simplify small tasks by eliminating unnecessary overhead.
 
