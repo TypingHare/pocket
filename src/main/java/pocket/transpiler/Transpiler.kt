@@ -10,6 +10,4 @@ import pocket.ast.node.Program
  */
 abstract class Transpiler() {
     abstract fun transpile(program: Program): String
-
-    abstract fun fnNameGenerator(filepath: String): String
 }

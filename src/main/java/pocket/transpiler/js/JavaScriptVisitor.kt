@@ -28,9 +28,9 @@ class JavaScriptVisitor(
         val exprString = moduleFn.returnExpr
             ?.let { visitExpr(it) }
             ?: "return 0;"
-        val fnName = moduleFn.fnName
+        val fnName = transpiler.getFnName(moduleFn.filepath)
 
-        return "\$global['%s'] = { export: {} };\n" +
+        return "\$global['$fnName'] = { export: {} };\n" +
                 "function $fnName () {\n" +
                 "$stmtListString\n" +
                 "$exprString\n" +
@@ -48,7 +48,7 @@ class JavaScriptVisitor(
         val declKeyword = getJSDeclKeyword(stmt.declKeyword)
         val idString = visitIdExpr(stmt.id)
         val valueString = visitExpr(stmt.value)
-        val fnName = transpiler.getFnName(stmt.filepath.toString())
+        val fnName = transpiler.getFnName(stmt.filepath)
 
         return if (stmt.isExport) {
             "$declKeyword $idString = $valueString;" +
@@ -71,7 +71,7 @@ class JavaScriptVisitor(
         val idListString = stmt.idList.joinToString(", ") { visitIdExpr(it) }
         val valueString = visitExpr(stmt.value)
 
-        val fnName = transpiler.getFnName(stmt.filepath.toString())
+        val fnName = transpiler.getFnName(stmt.filepath)
         return if (stmt.isExport) {
             StringBuilder().apply {
                 append("$declKeyword [ $idListString ] = $valueString;")
@@ -80,7 +80,7 @@ class JavaScriptVisitor(
                 }
             }.toString()
         } else {
-            "$declKeyword [ $idListString ] = $valueString;"
+            "$declKeyword { $idListString } = $valueString;"
         }
     }
 
@@ -127,16 +127,19 @@ class JavaScriptVisitor(
     }
 
     override fun visitLambdaExpr(expr: LambdaExpr): String {
-        val paramListString = expr.paramMap.keys.joinToString(", ")
+        val paramListString =
+            expr.paramMap.keys.joinToString(", ") { visitIdExpr(it) }
         val stmtStringList = expr.stmtList.map { visitStmt(it) }
-        val returnExprString =
-            expr.returnExpr?.let { "return " + visitExpr(it) }
+        val isGenerator = expr.returnExpr is YieldExpr
+        val asterisk = if (isGenerator) "*" else ""
+        val returnExprString = expr.returnExpr
+            ?.let { (if (isGenerator) "" else "return ") + visitExpr(it) }
         val bodyString = when (returnExprString) {
             null -> stmtStringList
             else -> stmtStringList + returnExprString
         }.joinToString("\n")
 
-        return "function ($paramListString) {\n$bodyString\n}"
+        return "function $asterisk($paramListString) {\n$bodyString\n}"
     }
 
     override fun visitYieldExpr(expr: YieldExpr): String {
@@ -167,9 +170,13 @@ class JavaScriptVisitor(
     }
 
     override fun visitObjectExpr(expr: ObjectExpr): String {
-        val fieldListString = expr.fieldMap
-            .mapValues { visitExpr(it.value) }
-            .map { (name, value) -> "$name: $value" }
+        val fieldStringList = mutableListOf<String>()
+        for ((idExpr, valueExpr) in expr.fieldMap.entries) {
+            val idString = visitIdExpr(idExpr)
+            val valueString = visitExpr(valueExpr)
+            fieldStringList.add("$idString: $valueString")
+        }
+        val fieldListString = fieldStringList
             .joinToString(", ")
 
         return "{ $fieldListString }"
@@ -193,7 +200,8 @@ class JavaScriptVisitor(
     override fun visitTypeExpr(expr: TypeExpr): String = ""
 
     override fun visitImportExpr(expr: ImportExpr): String {
-        val importedFnName = transpiler.getFnName(expr.targetPath)
+        val importedFnName =
+            transpiler.getFnName(expr.filepath, expr.targetPath)
         return "\$global['$importedFnName']['export']"
     }
 
@@ -202,7 +210,7 @@ class JavaScriptVisitor(
     ): List<String> {
         return moduleFnList.mapIndexed { index, moduleFn ->
             val fnString = visitModuleFn(moduleFn)
-            val fnName = moduleFn.fnName
+            val fnName = transpiler.getFnName(moduleFn.filepath)
 
             if (index == moduleFnList.lastIndex) {
                 "$fnString\nconst \$exitCode = $fnName();process.exit(\$exitCode);"

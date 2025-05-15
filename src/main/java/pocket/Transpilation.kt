@@ -3,11 +3,12 @@ package pocket
 import pocket.ast.builder.ProgramBuilder
 import pocket.transpiler.Transpiler
 import java.nio.file.Path
+import kotlin.reflect.KClass
 
-class Transpilation(val transpiler: Transpiler) {
+class Transpilation(val transpilerClass: KClass<out Transpiler>) {
     fun transpile(entryFilepath: Path): String {
-        val fnNameGenerator = transpiler::fnNameGenerator
-        val program = ProgramBuilder(entryFilepath, fnNameGenerator).build()
+        val transpiler = transpilerClass.constructors.first().call()
+        val program = ProgramBuilder(entryFilepath).build()
 
         return transpiler.transpile(program)
     }

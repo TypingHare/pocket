@@ -20,17 +20,13 @@ import java.nio.file.Path
  * taking no parameters.
  *
  * @parma filepath The absolute path of the module file.
- * @param fnName The name of the module function.
  */
-class ModuleFnBuilder(
-    val filepath: Path,
-    val fnName: String,
-) : PocketParserBaseVisitor<ASTNode>() {
+class ModuleFnBuilder(val filepath: Path) : PocketParserBaseVisitor<ASTNode>() {
     override fun visitModuleFn(ctx: ModuleFnContext): ASTNode {
         val stmtList = ctx.stmt()?.map { visitFor<Stmt>(it) } ?: emptyList()
         val expr = ctx.expr()?.let { visitFor<Expr>(it) }
 
-        return ModuleFn(startNode(ctx), fnName, stmtList, expr)
+        return ModuleFn(startNode(ctx), stmtList, expr)
     }
 
     override fun visitExprStmt(ctx: ExprStmtContext): ASTNode {
@@ -201,7 +197,8 @@ class ModuleFnBuilder(
     }
 
     override fun visitPostfixExpr(ctx: PostfixExprContext): ASTNode {
-        if (ctx.LEFT_PAREN().isEmpty() && ctx.lambda() == null) {
+        val hasTrailingLambda = ctx.lambda() != null
+        if (ctx.LEFT_PAREN().isEmpty() && !hasTrailingLambda) {
             return visit(ctx.primaryExpr())
         }
 
@@ -211,8 +208,29 @@ class ModuleFnBuilder(
             argListOrEmpty.argList()?.let(::toArgList).orEmpty()
         }
 
-        return argListList.fold(callee) { currentCallee, args ->
+        val lastExpr = argListList.fold(callee) { currentCallee, args ->
             CallExpr(startNode(ctx), isPartial, currentCallee, args)
+        }
+
+        return if (hasTrailingLambda) {
+            val lambdaExpr = visitFor<Expr>(ctx.lambda())
+            return if (lastExpr is CallExpr) {
+                CallExpr(
+                    startNode(ctx),
+                    isPartial,
+                    lastExpr.callee,
+                    lastExpr.argList + lambdaExpr
+                )
+            } else {
+                CallExpr(
+                    startNode(ctx),
+                    isPartial,
+                    lastExpr,
+                    listOf(lambdaExpr)
+                )
+            }
+        } else {
+            lastExpr
         }
     }
 
@@ -249,12 +267,12 @@ class ModuleFnBuilder(
         TypeExpr(startNode(ctx), visitFor(ctx.ID()))
 
     override fun visitImportExpr(ctx: ImportExprContext): ASTNode {
-        val filepath = when {
+        val targetPath = when {
             ctx.ID() != null -> ctx.ID().text
             ctx.filepath() != null -> ctx.filepath().text
             else -> ""
         }
-        return ImportExpr(startNode(ctx), filepath)
+        return ImportExpr(startNode(ctx), targetPath)
     }
 
     /**

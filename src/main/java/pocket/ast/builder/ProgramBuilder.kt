@@ -5,25 +5,15 @@ import org.antlr.v4.runtime.CommonTokenStream
 import pocket.antlr.PocketLexer
 import pocket.antlr.PocketParser
 import pocket.ast.DependencyNode
+import pocket.ast.DependencyTree
+import pocket.ast.MissingSourceFIleException
 import pocket.ast.node.ModuleFn
 import pocket.ast.node.Program
 import pocket.ast.visitor.DependencyVisitor
 import java.nio.file.Files
 import java.nio.file.Path
 
-/**
- * @param fnNameGenerator A function that maps an absolute file name to a valid
- *                        function name in the target language.
- */
-class ProgramBuilder(
-    private val entryFileAbsolutePath: Path,
-    private val fnNameGenerator: FnNameGenerator
-) {
-    /**
-     * The absolute path to the root directory where the entry file resides.
-     */
-    private val rootDirectory = entryFileAbsolutePath.parent
-
+class ProgramBuilder(private val entryFileAbsolutePath: Path) {
     /**
      * Maps absolute file paths to dependency nodes.
      */
@@ -35,50 +25,58 @@ class ProgramBuilder(
     private val moduleFnList = mutableListOf<ModuleFn>()
 
     fun build(): Program {
-        parse(entryFileAbsolutePath, listOf())
-        return Program(moduleFnList.last(), moduleFnList.toList())
+        val root = parse(entryFileAbsolutePath, listOf())
+
+        return Program(
+            moduleFnList.last(),
+            moduleFnList.toList(),
+            DependencyTree(root)
+        )
     }
 
     fun parse(
-        fileAbsolutePath: Path,
+        absolutePath: Path,
         dependencyPath: List<Path>
     ): DependencyNode {
         // If the file has been parsed, return the dependency node
-        dependencyMap[fileAbsolutePath]?.let { return it }
+        dependencyMap[absolutePath]?.let { return it }
 
         // If the file already exists in the dependency path, then a circular
         // dependency appears
-        if (dependencyPath.contains(fileAbsolutePath)) {
+        if (dependencyPath.contains(absolutePath)) {
             val dependencyPathString = dependencyPath.joinToString(" -> ")
             error("Circular dependency detected: $dependencyPathString")
         }
 
-        val sourceCode = Files.readString(fileAbsolutePath)
+        if (!Files.exists(absolutePath) || Files.isDirectory(absolutePath)) {
+            throw MissingSourceFIleException(absolutePath)
+        }
+
+        val sourceCode = Files.readString(absolutePath)
         val lexer = PocketLexer(CharStreams.fromString(sourceCode))
         val parser = PocketParser(CommonTokenStream(lexer))
         val moduleFnCst = parser.moduleFn()
 
-        val fnName = fnNameGenerator(fileAbsolutePath.toString())
-        val moduleFn = ModuleFnBuilder(fileAbsolutePath, fnName)
+        val moduleFn = ModuleFnBuilder(absolutePath)
             .visitModuleFn(moduleFnCst) as ModuleFn
 
         // Resolve dependencies
-        val dependencyPathSet = DependencyVisitor()
+        val targetPathMap = DependencyVisitor()
             .let { it.visitModuleFn(moduleFn); it.dependencySet }
-        val newDependencyList = dependencyPath + fileAbsolutePath
-        val nodes = dependencyPathSet
-            .map { parse(getFilePath(it), newDependencyList) }
-            .toSet()
-        val dependencyNode = DependencyNode(fileAbsolutePath, nodes)
-        dependencyMap.put(fileAbsolutePath, dependencyNode)
+            .associateWith { getFilePath(absolutePath, it) }
+        val newDependencyList = dependencyPath + absolutePath
+        val nodes = targetPathMap.mapValues {
+            parse(it.value, newDependencyList)
+        }
+        val dependencyNode = DependencyNode(absolutePath, nodes)
+        dependencyMap.put(absolutePath, dependencyNode)
 
         moduleFnList.add(moduleFn)
         return dependencyNode
     }
 
-    private fun getFilePath(targetPath: String): Path {
-        return rootDirectory.resolve(targetPath)
-    }
+    private fun getFilePath(
+        currentAbsolutePath: Path,
+        targetPath: String
+    ): Path = currentAbsolutePath.parent.resolve(targetPath)
 }
-
-typealias FnNameGenerator = (String) -> String

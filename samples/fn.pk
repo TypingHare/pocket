@@ -1,4 +1,0 @@
-export val square = { x => x * x };
-export val sum = { y, z => y + z };
-export val cube = { x => x * x * x };
-export val incr = { y => y + 1 };

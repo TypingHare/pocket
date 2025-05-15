@@ -1,7 +1,0 @@
-export val identity = { x => x };
-
-export val range = { start, end =>
-    yield { start } identity { v => v + 1 } { v => v < end }
-};
-
-native val each;

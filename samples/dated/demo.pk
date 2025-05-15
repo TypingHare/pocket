@@ -1,0 +1,2 @@
+val [ square, sum ] = import <fn.pk>;
+sum(5, 3) -> square -> println;

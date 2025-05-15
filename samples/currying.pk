@@ -1,3 +1,0 @@
-val sum = { x, y => x + y };
-val incr = &sum(1);
-incr(5) -> println;

@@ -7,12 +7,13 @@ import java.io.*
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.concurrent.Callable
+import kotlin.reflect.KClass
 import kotlin.system.exitProcess
 
 @CommandLine.Command(
     name = "pocket",
     mixinStandardHelpOptions = true,
-    version = ["1.0.0"],
+    version = ["0.0.0"],
     description = ["Pocket transpiler."]
 )
 object Pocket : Callable<Int?> {
@@ -54,8 +55,8 @@ object Pocket : Callable<Int?> {
         return CommandLine.ExitCode.OK
     }
 
-    private fun getTranspiler(): Transpiler {
-        return JavaScriptTranspiler()
+    private fun getTranspiler(): KClass<out Transpiler> {
+        return JavaScriptTranspiler::class
     }
 
     @Throws(IOException::class, InterruptedException::class)
