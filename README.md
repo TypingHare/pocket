@@ -61,7 +61,7 @@ In the future, Pocket will include built-in generator functions, so developers w
 Pocket requires [JRE](https://www.java.com/en/download/manual.jsp) and [Node.js](https://nodejs.org/en/download). Install Pocket with `npm` (or other Node.js package managers).
 
 ```shell
-$ npm install -g @typinghre/pocket
+$ npm install -g @typinghare/pocket
 ```
 
 ## Implementation
