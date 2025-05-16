@@ -26,7 +26,6 @@ class ProgramBuilder(private val entryFileAbsolutePath: Path) {
 
     fun build(): Program {
         val root = parse(entryFileAbsolutePath, listOf())
-
         return Program(
             moduleFnList.last(),
             moduleFnList.toList(),

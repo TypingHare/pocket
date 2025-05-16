@@ -8,16 +8,14 @@ abstract class Visitor<T> {
 
     abstract fun visitModuleFn(moduleFn: ModuleFn): T?
 
-    open fun visitStmt(stmt: Stmt): T? {
-        return when (stmt) {
-            is ExprStmt -> visitExprStmt(stmt)
-            is DeclStmt -> visitDeclStmt(stmt)
-            is AssignmentStmt -> visitAssignmentStmt(stmt)
-            is DestructingStmt -> visitDestructingStmt(stmt)
-            is BreakStmt -> visitBreakStmt(stmt)
-            is NativeStmt -> visitNativeStmt(stmt)
-            else -> error("Unexpected statement: $stmt")
-        }
+    open fun visitStmt(stmt: Stmt): T? = when (stmt) {
+        is ExprStmt -> visitExprStmt(stmt)
+        is DeclStmt -> visitDeclStmt(stmt)
+        is AssignmentStmt -> visitAssignmentStmt(stmt)
+        is DestructingStmt -> visitDestructingStmt(stmt)
+        is BreakStmt -> visitBreakStmt(stmt)
+        is NativeStmt -> visitNativeStmt(stmt)
+        else -> error("Unexpected statement: $stmt")
     }
 
     abstract fun visitExprStmt(stmt: ExprStmt): T?
@@ -27,24 +25,22 @@ abstract class Visitor<T> {
     abstract fun visitBreakStmt(stmt: BreakStmt): T?
     abstract fun visitNativeStmt(stmt: NativeStmt): T?
 
-    open fun visitExpr(expr: Expr): T? {
-        return when (expr) {
-            is LiteralExpr -> visitLiteralExpr(expr)
-            is IdExpr -> visitIdExpr(expr)
-            is MemberExpr -> visitMemberExpr(expr)
-            is BinaryExpr -> visitBinaryExpr(expr)
-            is UnaryExpr -> visitUnaryExpr(expr)
-            is LambdaExpr -> visitLambdaExpr(expr)
-            is YieldExpr -> visitYieldExpr(expr)
-            is CallExpr -> visitCallExpr(expr)
-            is ListExpr -> visitListExpr(expr)
-            is ObjectExpr -> visitObjectExpr(expr)
-            is IfExpr -> visitIfExpr(expr)
-            is LoopExpr -> visitLoopExpr(expr)
-            is TypeExpr -> visitTypeExpr(expr)
-            is ImportExpr -> visitImportExpr(expr)
-            else -> error("Unexpected expression: $expr")
-        }
+    open fun visitExpr(expr: Expr): T? = when (expr) {
+        is LiteralExpr -> visitLiteralExpr(expr)
+        is IdExpr -> visitIdExpr(expr)
+        is MemberExpr -> visitMemberExpr(expr)
+        is BinaryExpr -> visitBinaryExpr(expr)
+        is UnaryExpr -> visitUnaryExpr(expr)
+        is LambdaExpr -> visitLambdaExpr(expr)
+        is YieldExpr -> visitYieldExpr(expr)
+        is CallExpr -> visitCallExpr(expr)
+        is ListExpr -> visitListExpr(expr)
+        is ObjectExpr -> visitObjectExpr(expr)
+        is IfExpr -> visitIfExpr(expr)
+        is LoopExpr -> visitLoopExpr(expr)
+        is TypeExpr -> visitTypeExpr(expr)
+        is ImportExpr -> visitImportExpr(expr)
+        else -> error("Unexpected expression: $expr")
     }
 
     abstract fun visitLiteralExpr(expr: LiteralExpr): T?

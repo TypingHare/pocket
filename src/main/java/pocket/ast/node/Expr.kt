@@ -2,6 +2,7 @@ package pocket.ast.node
 
 import pocket.ast.BinaryOperator
 import pocket.ast.LiteralType
+import pocket.ast.Scope
 import pocket.ast.UnaryOperator
 
 abstract class Expr(node: ASTNode, var type: Type = Type.Any) : ASTNode(node)
@@ -34,7 +35,8 @@ open class LambdaExpr(
     val isTrade: Boolean,
     val paramMap: Map<IdExpr, TypeExpr?>,
     val stmtList: List<Stmt>,
-    val returnExpr: Expr?
+    val returnExpr: Expr?,
+    var scope: Scope = Scope.Unresolved
 ) : Expr(node)
 
 class YieldExpr(

@@ -8,7 +8,7 @@ sealed class Type {
     object String : Type()
 
     data class Function(
-        val parameterTypes: List<Type>,
+        val parameterTypeList: List<Type>,
         val returnType: Type
     ) : Type()
 
@@ -21,7 +21,7 @@ sealed class Type {
             Float -> "Float"
             Bool -> "Bool"
             String -> "String"
-            is Function -> "(${parameterTypes.joinToString(", ")}) => $returnType"
+            is Function -> "(${parameterTypeList.joinToString(", ")}) => $returnType"
             is Iterable -> "Iterable<$elementType>"
         }
     }
@@ -34,7 +34,7 @@ sealed class Type {
                 return false
             }
 
-            return this.parameterTypes == other.parameterTypes
+            return this.parameterTypeList == other.parameterTypeList
                     && this.returnType == other.returnType
         }
 
