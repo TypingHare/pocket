@@ -4,11 +4,11 @@ import pocket.ast.BinaryOperator
 import pocket.ast.LiteralType
 import pocket.ast.UnaryOperator
 
-abstract class Expr(node: ASTNode) : ASTNode(node)
+abstract class Expr(node: ASTNode, var type: Type = Type.Any) : ASTNode(node)
 
 class LiteralExpr(
     node: ASTNode,
-    val type: LiteralType,
+    val literalType: LiteralType,
     val literal: String
 ) : Expr(node)
 
