@@ -68,7 +68,7 @@ primaryExpr         : INT_LITERAL                                               
 tupleList           : expr COMMA | expr (COMMA expr)+ COMMA? ;
 
 // Postfix expression
-postfixExpr         : (AMPERSAND)? primaryExpr postfixPart* (lambda)? ;
+postfixExpr         : primaryExpr postfixPart* (lambda)? ;
 postfixPart         : DOT ID                                                     # postfixMemberAccess
                     | LEFT_PAREN argList RIGHT_PAREN                             # postfixCall
                     ;

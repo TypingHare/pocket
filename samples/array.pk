@@ -1,2 +1,18 @@
+/**
+ * Iterates over an iterable object and passes each to a given callback
+ * function.
+ *
+ * @param [0] A callback function taking each element in the iterable object.
+ * @param [1] An iterable object to traverse.
+ */
+native val each: { { Any => none }, *[Any] => none };
+
+/**
+ * Prints a value.
+ *
+ * @param [0] The value to print.
+ */
+native val println: { Any => none };
+
 val fruits = [ "apple", "banana", "cherry" ];
-fruits -> &each(println);
+fruits -> each(println);

@@ -50,10 +50,11 @@ class YieldExpr(
 
 class CallExpr(
     node: ASTNode,
-    val isPartial: Boolean,
     val callee: Expr,
     val argList: List<Expr>
-) : Expr(node)
+) : Expr(node) {
+    var isPartial: Boolean = false
+}
 
 class TupleExpr(node: ASTNode, val itemList: List<Expr>) : Expr(node)
 

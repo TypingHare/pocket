@@ -191,11 +191,34 @@ class ResolveTypeVisitor() : StructuralTypeVisitor<Object>() {
 
     override fun visitCallExpr(expr: CallExpr, scope: Scope): Object? {
         super.visitCallExpr(expr, scope)
+
         val calleeType = expr.callee.type
-        expr.type = when (calleeType) {
-            is Type.Function -> calleeType.returnType
-            else -> Type.Any
+        if (calleeType == Type.Any) {
+            return null
         }
+
+        if (calleeType !is Type.Function) {
+            error("${expr.callee} Expected function, got $calleeType instead")
+        }
+
+        val argTypeList = expr.argList.map { it.type }
+        val paramTypeList = calleeType.parameterTypeList
+        (0 until argTypeList.size).forEach {
+            if (argTypeList[it] != paramTypeList[it]) {
+                error("${expr.argList[it]} Expected ${paramTypeList[it]}, got ${argTypeList[it]} instead")
+            }
+        }
+
+        if (argTypeList.size == paramTypeList.size) {
+            expr.type = calleeType.returnType
+            return null
+        }
+
+        // Partial application
+        val partialParamTypeList =
+            paramTypeList.subList(argTypeList.size, paramTypeList.size)
+        expr.type = Type.Function(partialParamTypeList, calleeType.returnType)
+        expr.isPartial = true
 
         return null
     }

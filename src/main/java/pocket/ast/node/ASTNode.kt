@@ -12,4 +12,6 @@ abstract class ASTNode(
         node.line,
         node.column
     )
+
+    override fun toString(): String = "$filepath $line:$column"
 }

@@ -4,3 +4,7 @@
 - [ ] Type Checker
 - [ ] More terms and make the structure clearer
 - [ ] Member
+
+## Types
+
+- [ ] Partial application

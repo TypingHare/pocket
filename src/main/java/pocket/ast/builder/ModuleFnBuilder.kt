@@ -206,7 +206,6 @@ class ModuleFnBuilder(val filepath: Path) : PocketParserBaseVisitor<ASTNode>() {
             return visit(ctx.primaryExpr())
         }
 
-        val isPartial = ctx.AMPERSAND() != null
         val left = visitFor<Expr>(ctx.primaryExpr())
         val lastExpr = ctx.postfixPart().fold(left) { left, postfixPart ->
             val node = startNode(postfixPart)
@@ -215,7 +214,7 @@ class ModuleFnBuilder(val filepath: Path) : PocketParserBaseVisitor<ASTNode>() {
                     node, left, postfixPart.ID().text
                 )
                 is PostfixCallContext -> CallExpr(
-                    node, isPartial, left, toArgList(postfixPart.argList())
+                    node, left, toArgList(postfixPart.argList())
                 )
                 else -> error("Unexpected postfix part: ${postfixPart.text}")
             }
@@ -229,14 +228,9 @@ class ModuleFnBuilder(val filepath: Path) : PocketParserBaseVisitor<ASTNode>() {
         val lambdaExpr = visitFor<Expr>(ctx.lambda())
         val node = startNode(ctx)
         return if (lastExpr is CallExpr) {
-            CallExpr(
-                node,
-                isPartial,
-                lastExpr.callee,
-                lastExpr.argList + lambdaExpr
-            )
+            CallExpr(node, lastExpr.callee, lastExpr.argList + lambdaExpr)
         } else {
-            CallExpr(node, isPartial, lastExpr, listOf(lambdaExpr))
+            CallExpr(node, lastExpr, listOf(lambdaExpr))
         }
     }
 
