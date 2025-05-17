@@ -66,6 +66,11 @@ open class StructuralVisitor<T> : BaseVisitor<T>() {
         return null
     }
 
+    override fun visitTupleExpr(expr: TupleExpr): T? {
+        expr.itemList.forEach { visitExpr(it) }
+        return null
+    }
+
     override fun visitListExpr(expr: ListExpr): T? {
         expr.itemList.forEach { visitExpr(it) }
         return null
@@ -86,7 +91,7 @@ open class StructuralVisitor<T> : BaseVisitor<T>() {
 
     override fun visitLoopExpr(expr: LoopExpr): T? = visitExpr(expr.fn)
 
-    override fun visitTypeExpr(expr: TypeExpr): T? = visitExpr(expr.expr)
+    override fun visitTypeExpr(expr: TypeExpr): T? = null
 
     override fun visitImportExpr(expr: ImportExpr): T? = null
 }

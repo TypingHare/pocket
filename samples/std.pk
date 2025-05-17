@@ -3,5 +3,3 @@ export val identity = { x => x };
 export val range = { start, end =>
     yield { start } { v => v < end } identity { v => v + 1 }
 };
-
-native val each;

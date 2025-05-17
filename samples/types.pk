@@ -1,0 +1,5 @@
+native val println : { String => none };
+native val print : println;
+native val each : { { Any => none }, *[Any] => none };
+native val tuple: (Int, Int);
+native val object: [ name: String, age: Int ];

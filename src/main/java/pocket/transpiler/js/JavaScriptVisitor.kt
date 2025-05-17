@@ -3,7 +3,7 @@ package pocket.transpiler.js
 import pocket.ast.BinaryOperator
 import pocket.ast.DeclKeyword
 import pocket.ast.node.*
-import pocket.ast.visitor.Visitor
+import pocket.ast.visitor.BaseVisitor
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
@@ -11,7 +11,7 @@ import java.nio.file.Path
 
 class JavaScriptVisitor(
     private val transpiler: JavaScriptTranspiler
-) : Visitor<String>() {
+) : BaseVisitor<String>() {
     private val transpilerDirectory = Path.of("src/main/resources/pocket/js")
 
     override fun visitProgram(program: Program): String {
@@ -162,6 +162,11 @@ class JavaScriptVisitor(
         } else {
             "$calleeString($argListString)"
         }
+    }
+
+    override fun visitTupleExpr(expr: TupleExpr): String {
+        val itemListString = expr.itemList.joinToString(",") { visitExpr(it) }
+        return "[$itemListString]"
     }
 
     override fun visitListExpr(expr: ListExpr): String {

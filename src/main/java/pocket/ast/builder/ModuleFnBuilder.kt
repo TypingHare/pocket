@@ -73,7 +73,7 @@ class ModuleFnBuilder(val filepath: Path) : PocketParserBaseVisitor<ASTNode>() {
 
     override fun visitNativeStmt(ctx: NativeStmtContext): ASTNode {
         val id = toIdExpr(ctx.ID())
-        val type = ctx.type()?.let { visitFor<TypeExpr>(it) }
+        val type = visitFor<TypeExpr>(ctx.type())
 
         return NativeStmt(startNode(ctx), id, type)
     }
@@ -240,6 +240,11 @@ class ModuleFnBuilder(val filepath: Path) : PocketParserBaseVisitor<ASTNode>() {
         }
     }
 
+    override fun visitTupleExpr(ctx: TupleExprContext): ASTNode? {
+        val itemList = ctx.tupleList().expr().map { visitFor<Expr>(it) }
+        return TupleExpr(startNode(ctx), itemList)
+    }
+
     override fun visitEmptyListExpr(ctx: EmptyListExprContext): ASTNode {
         return ListExpr(startNode(ctx), mutableListOf())
     }
@@ -269,13 +274,32 @@ class ModuleFnBuilder(val filepath: Path) : PocketParserBaseVisitor<ASTNode>() {
     override fun visitLoopExpr(ctx: LoopExprContext): ASTNode =
         LoopExpr(startNode(ctx), visitFor(ctx.expr()))
 
-    override fun visitType(ctx: TypeContext): ASTNode =
-        TypeExpr(startNode(ctx), visitFor(ctx.ID()))
-
     override fun visitImportExpr(ctx: ImportExprContext): ASTNode {
         val targetPath = ctx.targetPath().text
         return ImportExpr(startNode(ctx), targetPath)
     }
+
+    override fun visitIdTypeExpr(ctx: IdTypeExprContext?): ASTNode? =
+        ctx?.let { parseTypeExprContext(it) }
+
+    override fun visitNoneTypeExpr(ctx: NoneTypeExprContext?): ASTNode? =
+        ctx?.let { parseTypeExprContext(it) }
+
+    override fun visitLambdaTypeExpr(ctx: LambdaTypeExprContext?): ASTNode? =
+        ctx?.let { parseTypeExprContext(it) }
+
+    override fun visitTupleTypeExpr(ctx: TupleTypeExprContext?): ASTNode? =
+        ctx?.let { parseTypeExprContext(it) }
+
+    override fun visitEmptyListTypeExpr(ctx: EmptyListTypeExprContext?): ASTNode? =
+        ctx?.let { parseTypeExprContext(it) }
+
+    override fun visitListTypeExpr(ctx: ListTypeExprContext?): ASTNode? =
+        ctx?.let { parseTypeExprContext(it) }
+
+    override fun visitObjectTypeExpr(ctx: ObjectTypeExprContext?): ASTNode? =
+        ctx?.let { parseTypeExprContext(it) }
+
 
     /**
      * Visits a parse tree and cast the return type into a specific type.
@@ -365,5 +389,65 @@ class ModuleFnBuilder(val filepath: Path) : PocketParserBaseVisitor<ASTNode>() {
 
     private fun toArgList(ctx: ArgListContext): List<Expr> =
         ctx.expr().map { visitFor(it) }
+
+    private fun parseTypeExprContext(ctx: TypeContext): TypeExpr =
+        when (ctx) {
+            is NoneTypeExprContext -> NoneTypeExpr(startNode(ctx))
+            is IdTypeExprContext -> parseIdTypeExpr(ctx)
+            is LambdaTypeExprContext -> parseLambdaTypeExpr(ctx)
+            is TupleTypeExprContext -> parseTupleTypeExpr(ctx)
+            is EmptyListTypeExprContext -> parseEmptyListTypeExpr(ctx)
+            is ListTypeExprContext -> parseListTypeExpr(ctx)
+            is ObjectTypeExprContext -> parseObjectTypeExpr(ctx)
+            else -> error("Unknown type: ${ctx.text}")
+        }
+
+    private fun parseIdTypeExpr(ctx: IdTypeExprContext): TypeExpr =
+        IdTypeExpr(startNode(ctx), ctx.ID().text)
+
+    private fun parseLambdaTypeExpr(ctx: LambdaTypeExprContext): TypeExpr {
+        val paramTypeList = ctx.typeList()?.type()?.map {
+            parseTypeExprContext(it)
+        } ?: emptyList()
+        val returnType = parseTypeExprContext(ctx.type())
+
+        return LambdaTypeExpr(startNode(ctx), paramTypeList, returnType)
+    }
+
+    private fun parseTupleTypeExpr(ctx: TupleTypeExprContext): TypeExpr {
+        val itemTypeList = ctx.typeList()?.type()?.map {
+            parseTypeExprContext(it)
+        } ?: emptyList()
+
+        return TupleTypeExpr(startNode(ctx), itemTypeList)
+    }
+
+    private fun parseEmptyListTypeExpr(
+        ctx: EmptyListTypeExprContext
+    ): TypeExpr =
+        if (ctx.ASTERISK() != null)
+            IterableTypeExpr(
+                startNode(ctx),
+                NoneTypeExpr(startNode(ctx))
+            ) else ListTypeExpr(startNode(ctx), NoneTypeExpr(startNode(ctx)))
+
+    private fun parseListTypeExpr(ctx: ListTypeExprContext): TypeExpr {
+        val itemType = parseTypeExprContext(ctx.type())
+        return ListTypeExpr(startNode(ctx), itemType)
+    }
+
+    private fun parseObjectTypeExpr(ctx: ObjectTypeExprContext): TypeExpr {
+        val objectTypeList = ctx.objectTypeList()
+        val idList = objectTypeList.ID()
+        val typeList = objectTypeList.type()
+        val fieldTypeMap = (0 until typeList.size).associate {
+            val id = idList[it]
+            val type = typeList[it]
+            val idExpr = IdExpr(tokenToNode(id.symbol), id.text)
+            idExpr to parseTypeExprContext(type)
+        }
+
+        return ObjectTypeExpr(startNode(ctx), fieldTypeMap)
+    }
 }
 

@@ -12,7 +12,7 @@ open class StructuralTypeVisitor<T> : BaseTypeVisitor<T>() {
     }
 
     override fun visitModuleFn(moduleFn: ModuleFn, scope: Scope): T? =
-        visitLambdaExpr(moduleFn as LambdaExpr, scope)
+        visitLambdaExpr(moduleFn as LambdaExpr, moduleFn.scope)
 
     override fun visitExprStmt(stmt: ExprStmt, scope: Scope): T? =
         visitExpr(stmt.expr, scope)
@@ -48,9 +48,6 @@ open class StructuralTypeVisitor<T> : BaseTypeVisitor<T>() {
         visitExpr(expr.operand, scope)
 
     override fun visitLambdaExpr(expr: LambdaExpr, scope: Scope): T? {
-        expr.paramMap.values.forEach {
-            if (it != null) visitExpr(it, expr.scope)
-        }
         expr.stmtList.forEach { visitStmt(it, expr.scope) }
         expr.returnExpr?.let { visitExpr(it, expr.scope) }
 
@@ -95,7 +92,4 @@ open class StructuralTypeVisitor<T> : BaseTypeVisitor<T>() {
 
     override fun visitLoopExpr(expr: LoopExpr, scope: Scope): T? =
         visitExpr(expr.fn, scope)
-
-    override fun visitTypeExpr(expr: TypeExpr, scope: Scope): T? =
-        visitExpr(expr.expr, scope)
 }

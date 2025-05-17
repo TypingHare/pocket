@@ -1,0 +1,3 @@
+native val each: { { Any => none }, *[Any] => none };
+val tuple = (1, 2, 3);
+tuple -> &each(println);

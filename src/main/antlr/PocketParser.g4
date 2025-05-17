@@ -30,7 +30,7 @@ stmt                : expr SEMICOLON                                            
                     | (EXPORT)? decl destructuringList EQUALS expr SEMICOLON     # DestructingStmt
                     | ID EQUALS expr SEMICOLON                                   # AssgnStmt
                     | BREAK IF expr SEMICOLON                                    # BreakStmt
-                    | NATIVE VAL ID (COLON type)? SEMICOLON                      # NativeStmt
+                    | NATIVE VAL ID COLON type SEMICOLON                         # NativeStmt
                     ;
 
 // Unary/Binary operations
@@ -54,6 +54,7 @@ primaryExpr         : INT_LITERAL                                               
                     | (TRUE | FALSE)                                             # boolExpr
                     | STRING_LITERAL                                             # stringLiteralExpr
                     | ID                                                         # idExpr
+                    | LEFT_PAREN tupleList RIGHT_PAREN                           # tupleExpr
                     | LEFT_BRACKET RIGHT_BRACKET                                 # emptyListExpr
                     | LEFT_BRACKET objectElementList RIGHT_BRACKET               # objectExpr
                     | LEFT_BRACKET listElementList RIGHT_BRACKET                 # listExpr
@@ -64,6 +65,7 @@ primaryExpr         : INT_LITERAL                                               
                     | IMPORT LESS_THAN targetPath GREATER_THAN                   # importExpr
                     | LEFT_PAREN expr RIGHT_PAREN                                # parenExpr
                     ;
+tupleList           : expr COMMA | expr (COMMA expr)+ COMMA? ;
 
 // Postfix expression
 postfixExpr         : (AMPERSAND)? primaryExpr postfixPart* (lambda)? ;
@@ -72,12 +74,18 @@ postfixPart         : DOT ID                                                    
                     ;
 argList             : expr (COMMA expr)* ;
 
-// Type (maybe expand in the future)
-// typeParamList   : type (COMMA type)* ;
-type            : ID;
-//type            : ID                                                                # idTypeExpr
-//                | LEFT_PAREN (typeParamList)? RIGHT_PAREN FAT_ARROW (type | VOID)   # lambdaTypeExpr
-//                ;
+// Type
+
+type                : ID                                                         # idTypeExpr
+                    | None                                                       # noneTypeExpr
+                    | LEFT_BRACE (typeList FAT_ARROW)? type RIGHT_BRACE          # lambdaTypeExpr
+                    | LEFT_PAREN typeList RIGHT_PAREN                            # tupleTypeExpr
+                    | (ASTERISK)? LEFT_BRACKET RIGHT_BRACKET                     # emptyListTypeExpr
+                    | (ASTERISK)? LEFT_BRACKET type RIGHT_BRACKET                # listTypeExpr
+                    | LEFT_BRACKET objectTypeList RIGHT_BRACKET                  # objectTypeExpr
+                    ;
+typeList            : type (COMMA type)* ;
+objectTypeList      : ID COLON type (COMMA ID COLON type)* COMMA?;
 
 // Lambda expression
 param               : ID (COLON type)? ;

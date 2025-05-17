@@ -14,7 +14,7 @@ import kotlin.system.exitProcess
 @CommandLine.Command(
     name = "pocket",
     mixinStandardHelpOptions = true,
-    version = ["0.0.0"],
+    version = ["0.1.0"],
     description = ["Pocket transpiler."]
 )
 object Pocket : Callable<Int?> {

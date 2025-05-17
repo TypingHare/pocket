@@ -4,6 +4,7 @@ import pocket.ast.BinaryOperator
 import pocket.ast.LiteralType
 import pocket.ast.Scope
 import pocket.ast.UnaryOperator
+import java.nio.file.Path
 
 abstract class Expr(node: ASTNode, var type: Type = Type.Any) : ASTNode(node)
 
@@ -54,6 +55,8 @@ class CallExpr(
     val argList: List<Expr>
 ) : Expr(node)
 
+class TupleExpr(node: ASTNode, val itemList: List<Expr>) : Expr(node)
+
 class ListExpr(node: ASTNode, val itemList: List<Expr>) : Expr(node)
 
 class ObjectExpr(
@@ -70,6 +73,39 @@ class IfExpr(
 
 class LoopExpr(node: ASTNode, val fn: Expr) : Expr(node)
 
-class TypeExpr(node: ASTNode, val expr: Expr) : Expr(node)
+class ImportExpr(node: ASTNode, val targetPath: String) : Expr(node) {
+    var absolutePath: Path? = null
+    var moduleFn: ModuleFn? = null
+}
 
-class ImportExpr(node: ASTNode, val targetPath: String) : Expr(node)
+abstract class TypeExpr(node: ASTNode) : Expr(node)
+
+class NoneTypeExpr(node: ASTNode) : TypeExpr(node)
+
+class IdTypeExpr(node: ASTNode, val name: String) : TypeExpr(node)
+
+class LambdaTypeExpr(
+    node: ASTNode,
+    val paramTypeList: List<TypeExpr>,
+    val returnType: TypeExpr
+) : TypeExpr(node)
+
+class TupleTypeExpr(
+    node: ASTNode,
+    val itemTypeList: List<TypeExpr>
+) : TypeExpr(node)
+
+open class IterableTypeExpr(
+    node: ASTNode,
+    val itemType: TypeExpr
+) : TypeExpr(node)
+
+class ListTypeExpr(
+    node: ASTNode,
+    itemType: TypeExpr
+) : IterableTypeExpr(node, itemType)
+
+class ObjectTypeExpr(
+    node: ASTNode,
+    val fieldTypeMap: Map<IdExpr, TypeExpr>
+) : TypeExpr(node)

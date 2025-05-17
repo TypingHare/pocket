@@ -9,11 +9,12 @@ import kotlin.reflect.KClass
 
 class Transpilation(val transpilerClass: KClass<out Transpiler>) {
     fun transpile(entryFilepath: Path): String {
+        // Build the raw AST
         val program = ProgramBuilder(entryFilepath).build()
 
         // Semantic analysis
-        ScopeVisitor().visitProgram(program)
-        ResolveTypeVisitor().visitProgram(program)
+         ScopeVisitor().visitProgram(program)
+         ResolveTypeVisitor().visitProgram(program)
 
         val transpiler = transpilerClass.constructors.first().call(program)
 

@@ -1,0 +1,3 @@
+// Okay
+val [ range ] = import <std.pk>;
+range(1, 10) -> &each { num => num -> println };

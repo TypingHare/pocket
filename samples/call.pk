@@ -1,2 +1,3 @@
+native val println: { String => none };
 val greet = { name => "Hello " + name + "!" };
 "Pocket" -> greet -> println;

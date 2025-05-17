@@ -27,10 +27,45 @@ open class BaseTypeVisitor<T>() : TypeVisitor<T>() {
     override fun visitLambdaExpr(expr: LambdaExpr, scope: Scope): T? = null
     override fun visitYieldExpr(expr: YieldExpr, scope: Scope): T? = null
     override fun visitCallExpr(expr: CallExpr, scope: Scope): T? = null
+    override fun visitTupleExpr(expr: TupleExpr, scope: Scope): T? = null
     override fun visitListExpr(expr: ListExpr, scope: Scope): T? = null
     override fun visitObjectExpr(expr: ObjectExpr, scope: Scope): T? = null
     override fun visitIfExpr(expr: IfExpr, scope: Scope): T? = null
     override fun visitLoopExpr(expr: LoopExpr, scope: Scope): T? = null
-    override fun visitTypeExpr(expr: TypeExpr, scope: Scope): T? = null
     override fun visitImportExpr(expr: ImportExpr, scope: Scope): T? = null
+
+    override fun visitNoneTypeExpr(
+        expr: NoneTypeExpr,
+        scope: Scope
+    ): T? = null
+
+    override fun visitIdTypeExpr(
+        expr: IdTypeExpr,
+        scope: Scope
+    ): T? = null
+
+    override fun visitLambdaTypeExpr(
+        expr: LambdaTypeExpr,
+        scope: Scope
+    ): T? = null
+
+    override fun visitTupleTypeExpr(
+        expr: TupleTypeExpr,
+        scope: Scope
+    ): T? = null
+
+    override fun visitListTypeExpr(
+        expr: ListTypeExpr,
+        scope: Scope
+    ): T? = null
+
+    override fun visitIterableTypeExpr(
+        expr: IterableTypeExpr,
+        scope: Scope
+    ): T? = null
+
+    override fun visitObjectTypeExpr(
+        expr: ObjectTypeExpr,
+        scope: Scope
+    ): T? = null
 }

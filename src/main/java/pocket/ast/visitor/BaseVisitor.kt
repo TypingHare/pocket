@@ -22,10 +22,19 @@ open class BaseVisitor<T>() : Visitor<T>() {
     override fun visitLambdaExpr(expr: LambdaExpr): T? = null
     override fun visitYieldExpr(expr: YieldExpr): T? = null
     override fun visitCallExpr(expr: CallExpr): T? = null
+    override fun visitTupleExpr(expr: TupleExpr): T? = null
     override fun visitListExpr(expr: ListExpr): T? = null
     override fun visitObjectExpr(expr: ObjectExpr): T? = null
     override fun visitIfExpr(expr: IfExpr): T? = null
     override fun visitLoopExpr(expr: LoopExpr): T? = null
-    override fun visitTypeExpr(expr: TypeExpr): T? = null
     override fun visitImportExpr(expr: ImportExpr): T? = null
+
+    override fun visitNoneTypeExpr(expr: NoneTypeExpr): T? = null
+    override fun visitIdTypeExpr(expr: IdTypeExpr): T? = null
+    override fun visitLambdaTypeExpr(expr: LambdaTypeExpr): T? = null
+    override fun visitTupleTypeExpr(expr: TupleTypeExpr): T? = null
+    override fun visitListTypeExpr(expr: ListTypeExpr): T? = null
+    override fun visitIterableTypeExpr(expr: IterableTypeExpr): T? = null
+    override fun visitObjectTypeExpr(expr: ObjectTypeExpr): T? = null
+    override fun visitTypeExpr(expr: TypeExpr): T? = null
 }

@@ -1,4 +1,5 @@
 function $loop(fn) {
+    let $result
     while (true) {
         if (fn() === true) break
     }

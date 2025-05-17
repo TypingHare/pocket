@@ -34,12 +34,13 @@ abstract class TypeVisitor<T>() {
         is LambdaExpr -> visitLambdaExpr(expr, scope)
         is YieldExpr -> visitYieldExpr(expr, scope)
         is CallExpr -> visitCallExpr(expr, scope)
+        is TupleExpr -> visitTupleExpr(expr, scope)
         is ListExpr -> visitListExpr(expr, scope)
         is ObjectExpr -> visitObjectExpr(expr, scope)
         is IfExpr -> visitIfExpr(expr, scope)
         is LoopExpr -> visitLoopExpr(expr, scope)
-        is TypeExpr -> visitTypeExpr(expr, scope)
         is ImportExpr -> visitImportExpr(expr, scope)
+        is TypeExpr -> visitTypeExpr(expr, scope)
         else -> error("Unexpected expression: $expr")
     }
 
@@ -51,10 +52,29 @@ abstract class TypeVisitor<T>() {
     abstract fun visitLambdaExpr(expr: LambdaExpr, scope: Scope): T?
     abstract fun visitYieldExpr(expr: YieldExpr, scope: Scope): T?
     abstract fun visitCallExpr(expr: CallExpr, scope: Scope): T?
+    abstract fun visitTupleExpr(expr: TupleExpr, scope: Scope): T?
     abstract fun visitListExpr(expr: ListExpr, scope: Scope): T?
     abstract fun visitObjectExpr(expr: ObjectExpr, scope: Scope): T?
     abstract fun visitIfExpr(expr: IfExpr, scope: Scope): T?
     abstract fun visitLoopExpr(expr: LoopExpr, scope: Scope): T?
-    abstract fun visitTypeExpr(expr: TypeExpr, scope: Scope): T?
     abstract fun visitImportExpr(expr: ImportExpr, scope: Scope): T?
+
+    open fun visitTypeExpr(expr: Expr, scope: Scope): T? = when (expr) {
+        is NoneTypeExpr -> visitNoneTypeExpr(expr, scope)
+        is IdTypeExpr -> visitIdTypeExpr(expr, scope)
+        is LambdaTypeExpr -> visitLambdaTypeExpr(expr, scope)
+        is TupleTypeExpr -> visitTupleTypeExpr(expr, scope)
+        is ListTypeExpr -> visitListTypeExpr(expr, scope)
+        is IterableTypeExpr -> visitIterableTypeExpr(expr, scope)
+        is ObjectTypeExpr -> visitObjectTypeExpr(expr, scope)
+        else -> error("Unexpected type: $expr")
+    }
+
+    abstract fun visitNoneTypeExpr(expr: NoneTypeExpr, scope: Scope): T?
+    abstract fun visitIdTypeExpr(expr: IdTypeExpr, scope: Scope): T?
+    abstract fun visitLambdaTypeExpr(expr: LambdaTypeExpr, scope: Scope): T?
+    abstract fun visitTupleTypeExpr(expr: TupleTypeExpr, scope: Scope): T?
+    abstract fun visitListTypeExpr(expr: ListTypeExpr, scope: Scope): T?
+    abstract fun visitIterableTypeExpr(expr: IterableTypeExpr, scope: Scope): T?
+    abstract fun visitObjectTypeExpr(expr: ObjectTypeExpr, scope: Scope): T?
 }

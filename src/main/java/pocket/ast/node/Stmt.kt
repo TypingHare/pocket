@@ -34,5 +34,5 @@ class BreakStmt(node: ASTNode, val condition: Expr) : Stmt(node)
 class NativeStmt(
     node: ASTNode,
     val id: IdExpr,
-    val type: TypeExpr?
+    val type: TypeExpr
 ) : Stmt(node)

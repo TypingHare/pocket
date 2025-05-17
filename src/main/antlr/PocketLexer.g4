@@ -51,6 +51,8 @@ NATIVE                  : 'native' ;
 TRUE                    : 'true' ;
 FALSE                   : 'false' ;
 
+None                    : 'none' ;
+
 // Literals
 INT_LITERAL             : '0' | [1-9] [0-9]* ;
 FLOAT_LITERAL           : [0-9]+ '.' [0-9]* ([eE] [+-]? [0-9]+)?

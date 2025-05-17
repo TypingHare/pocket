@@ -1,6 +1,6 @@
 package pocket.ast
 
-import pocket.ast.node.ASTNode
+import pocket.ast.node.Expr
 
 class Scope(
     val parent: Scope? = Unresolved,
@@ -21,6 +21,7 @@ class Scope(
 
 data class Symbol(
     val name: String,
-    val declNode: ASTNode,
-    val isMutable: Boolean
+    val declExpr: Expr?,
+    val isMutable: Boolean,
+    val isDestructured: Boolean
 )
