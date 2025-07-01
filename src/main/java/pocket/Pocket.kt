@@ -25,6 +25,12 @@ object Pocket : Callable<Int?> {
     private var entryFilepath: String = ""
 
     @CommandLine.Option(
+        names = ["-p", "--paths"],
+        description = ["The module resolution path."]
+    )
+    private var modulePathsString: String = ""
+
+    @CommandLine.Option(
         names = ["-o", "--output"],
         description = ["The name of the output file."],
         defaultValue = "out.js"
@@ -56,8 +62,12 @@ object Pocket : Callable<Int?> {
     @Throws(Exception::class)
     override fun call(): Int {
         val workingDirectory = Path.of(System.getProperty("user.dir"))
-        val entryFilepath = workingDirectory.resolve(Path.of(entryFilepath))
-        val targetCode = Transpilation(getTranspiler()).transpile(entryFilepath)
+        val entryFilepath = workingDirectory.resolve(entryFilepath)
+        val modulePaths = modulePathsString.split(":").map { Path.of(it) }
+
+        val transpiler = getTranspiler()
+        val transpilation = Transpilation(transpiler, modulePaths)
+        val targetCode = transpilation.transpile(entryFilepath)
 
         if (shouldEmit) {
             Files.writeString(

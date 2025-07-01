@@ -14,7 +14,10 @@ import pocket.ast.visitor.StructuralVisitor
 import java.nio.file.Files
 import java.nio.file.Path
 
-class ProgramBuilder(private val entryFileAbsolutePath: Path) {
+class ProgramBuilder(
+    private val entryFileAbsolutePath: Path,
+    private val modulePaths: List<Path>,
+) {
     /**
      * Maps absolute file paths to module functions and dependency nodes.
      */

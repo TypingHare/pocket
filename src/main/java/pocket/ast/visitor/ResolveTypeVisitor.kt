@@ -7,6 +7,9 @@ import pocket.ast.Symbol
 import pocket.ast.node.*
 import java.nio.file.Path
 
+/**
+ * Type analysis.
+ */
 class ResolveTypeVisitor() : StructuralTypeVisitor<Object>() {
     override fun visitProgram(program: Program): Object? {
         val definePrimitiveSymbol: (String, Type) -> Unit = { name, type ->

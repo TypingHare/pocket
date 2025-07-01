@@ -7,14 +7,17 @@ import pocket.transpiler.Transpiler
 import java.nio.file.Path
 import kotlin.reflect.KClass
 
-class Transpilation(val transpilerClass: KClass<out Transpiler>) {
+class Transpilation(
+    private val transpilerClass: KClass<out Transpiler>,
+    private val modulePaths: List<Path>,
+) {
     fun transpile(entryFilepath: Path): String {
-        // Build the raw AST
-        val program = ProgramBuilder(entryFilepath).build()
+        // Build the raw abstract syntax tree
+        val program = ProgramBuilder(entryFilepath, modulePaths).build()
 
         // Semantic analysis
-         ScopeVisitor().visitProgram(program)
-         ResolveTypeVisitor().visitProgram(program)
+        ScopeVisitor().visitProgram(program)
+        ResolveTypeVisitor().visitProgram(program)
 
         val transpiler = transpilerClass.constructors.first().call(program)
 
