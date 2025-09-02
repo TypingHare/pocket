@@ -1,0 +1,17 @@
+# macOS System files
+.DS_Store
+
+# JetBrains
+.idea
+*.iml
+
+# Gradle/Kotlin
+.gradle
+.kotlin
+/build
+
+# kotlin-language-server
+kls_database.db
+
+# Local
+local

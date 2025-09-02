@@ -1,0 +1,17 @@
+val fruits = [ "apple", "banana", "cherry" ];
+fruits -> &each { fruit => println(fruit) };
+
+// JavaScript
+const fruits = [ "apple", "banana", "cherry" ];
+for (const fruit of fruits) {
+   console.log(fruit)
+}
+
+// Better way (FP)
+fruits.map()
+
+informal Chinese -> formal Chinese -> formal English
+
+mobile **plan** 手机 plan
+insurance **plan** 保险 plan
+

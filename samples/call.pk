@@ -1,0 +1,37 @@
+native val println: { String => none };
+
+function greet(name) {
+    return "Hello " + name + "!"
+}
+
+const greet = function (name) {
+    return "Hello " + name + "!"
+}
+println(greet("Pocket"))
+
+val greet = { name => "Hello " + name + "!" };
+"Pocket" -> greet -> println;
+
+async scenarios => callback/async/await
+
+// Nested callbacks
+fetch('user/5', (response) => {
+    const userId = response.data.userType
+    fetch('/promotions/' + userType, (response) => {
+        // print all the promotions
+        console.log(response.data.list)
+    })
+})
+
+// In ES5+
+const userResponse = await fetch('user/5')
+const userId = response.data.userType
+const promotionResponse = await fetch('promotions/' + userType)
+console.log(response2.data.list)
+
+// Neater code
+// Chaining programming
+Fetch('user/5')
+  -> { it.data.userType }
+  -> Fetch('/promotions/' + userType)
+  -> { it.data.list -> println }
